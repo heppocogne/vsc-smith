@@ -1,20 +1,22 @@
 {
-  "name": "VSCodeSmith",
-  "displayName": "vsc-smith",
+  "name": "vsc-smith",
+  "displayName": "VSCodeSmith",
   "description": "雑多な拡張機能集",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.140.0"
+    "vscode": "^1.70.0"
   },
   "categories": [
-    "Other"
+     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:vsc-smith.helloWorld"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "VSCodeSmith.helloWorld",
+        "command": "vsc-smith.helloWorld",
         "title": "Hello World"
       }
     ]
@@ -48,5 +50,9 @@
   "overrides": {
     "diff": "^8.0.4",
     "serialize-javascript": "^7.0.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heppocogne/vsc-smith.git"
   }
 }

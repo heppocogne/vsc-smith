@@ -7,17 +7,93 @@
     "vscode": "^1.70.0"
   },
   "categories": [
-     "Other"
+    "Other"
   ],
   "activationEvents": [
-    "onCommand:vsc-smith.helloWorld"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
+    "configuration": {
+      "title": "VSCodeSmith",
+      "properties": {
+        "vsc-smith.fileSize.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "file-size: ファイルサイズ表示機能を有効にする"
+        },
+        "vsc-smith.fileSize.statusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "file-size: アクティブなファイルのサイズをステータスバーに表示する"
+        },
+        "vsc-smith.fileSize.statusBarAlignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "default": "left",
+          "description": "file-size: ステータスバー上の表示位置 (右側はテキストファイルで行/列・エンコーディングなどの項目と並ぶため、既定は左)"
+        },
+        "vsc-smith.fileSize.explorerTooltip": {
+          "type": "boolean",
+          "default": true,
+          "description": "file-size: エクスプローラーでファイルにホバーした時のツールチップにサイズを表示する"
+        },
+        "vsc-smith.binaryBlocker.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "binary-blocker: 指定拡張子のファイルを読み込まずにプレースホルダーを表示する。`workbench.editorAssociations` (ユーザー設定) にエントリを追加/削除して実現する"
+        },
+        "vsc-smith.binaryBlocker.extensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            ".exe",
+            ".dll",
+            ".so",
+            ".dylib",
+            ".o",
+            ".obj",
+            ".a",
+            ".lib",
+            ".pdb",
+            ".ilk",
+            ".exp",
+            ".bin",
+            ".class",
+            ".pyc",
+            ".pyd",
+            ".wasm",
+            ".zip",
+            ".7z",
+            ".gz",
+            ".tgz",
+            ".xz",
+            ".bz2",
+            ".tar",
+            ".rar",
+            ".jar",
+            ".iso",
+            ".msi"
+          ],
+          "description": "binary-blocker: バイナリとして扱う拡張子 (例: \".exe\")"
+        }
+      }
+    },
+    "customEditors": [
       {
-        "command": "vsc-smith.helloWorld",
-        "title": "Hello World"
+        "viewType": "vsc-smith.binaryBlocker",
+        "displayName": "Binary Blocker",
+        "selector": [
+          {
+            "filenamePattern": "*"
+          }
+        ],
+        "priority": "option"
       }
     ]
   },
@@ -36,7 +112,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.140.0",
+    "@types/vscode": "^1.70.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
     "typescript-eslint": "^8.61.1",

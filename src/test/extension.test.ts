@@ -1,15 +1,21 @@
 import * as assert from 'assert';
+import { formatExactBytes, formatFileSize } from '../util/format';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+suite('formatFileSize', () => {
+	test('bytes', () => {
+		assert.strictEqual(formatFileSize(0), '0 B');
+		assert.strictEqual(formatFileSize(1023), '1023 B');
+	});
 
-suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+	test('larger units', () => {
+		assert.strictEqual(formatFileSize(1024), '1.00 KB');
+		assert.strictEqual(formatFileSize(1536), '1.50 KB');
+		assert.strictEqual(formatFileSize(50 * 1024), '50.0 KB');
+		assert.strictEqual(formatFileSize(500 * 1024), '500 KB');
+		assert.strictEqual(formatFileSize(3 * 1024 ** 3), '3.00 GB');
+	});
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	test('exact bytes', () => {
+		assert.strictEqual(formatExactBytes(1234567), '1,234,567 bytes');
 	});
 });

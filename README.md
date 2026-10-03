@@ -1,71 +1,34 @@
-# VSCodeSmith README
+# VSCodeSmith
+![](https://github.com/heppocogne/vsc-smith/actions/workflows/ci.yaml/badge.svg)
 
-This is the README for your extension "VSCodeSmith". After writing up a brief description, we recommend including the following sections.
+雑多な拡張機能集です。
 
-## Features
+## 機能
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### File Size
 
-For example if there is an image subfolder under your extension project workspace:
+アクティブなファイルのサイズをステータスバーに表示し、エクスプローラーのツールチップにもサイズを表示します。
 
-\!\[feature X\]\(images/feature-x.png\)
+### Copy Path
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+標準の "Copy Relative Path" (`explorer.copyRelativePathSeparator`) とは逆の区切り文字で相対パスをコピーするコマンドを追加します。
 
-## Requirements
+- `VSCodeSmith: Copy Relative Path (/)`
+- `VSCodeSmith: Copy Relative Path (\)`
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### Markdown
 
-## Extension Settings
+VSCode標準のMarkdownサポート+多少の構文補完です。
+Enter で箇条書き・番号付きリスト・タスクリスト・引用を継続し、Tab / Shift+Tab でリスト項目をインデント/アウトデントします。Markdown All in One が有効なときは、既定でそちらに譲ります。
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## 設定
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+| 設定 | 既定値 | 説明 |
+| --- | --- | --- |
+| `vsc-smith.fileSize.enabled` | `true` | ファイルサイズ表示機能を有効にする |
+| `vsc-smith.fileSize.statusBar` | `true` | ステータスバーにサイズを表示する |
+| `vsc-smith.fileSize.statusBarAlignment` | `left` | ステータスバー上の表示位置 |
+| `vsc-smith.fileSize.explorerTooltip` | `true` | エクスプローラーのツールチップにサイズを表示する |
+| `vsc-smith.copyPath.enabled` | `true` | 逆区切り文字の相対パスコピーを有効にする |
+| `vsc-smith.markdown.enabled` | `true` | Markdown のリスト継続・インデントを有効にする |
+| `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る |

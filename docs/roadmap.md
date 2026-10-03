@@ -104,18 +104,58 @@
 
 ### 方針
 
-- `onEnterRules` はキャプチャした記号を引き継げず、番号もインクリメントできないので、
-  `when: editorLangId == markdown && !suggestWidgetVisible && ...` 付きのキーバインドで独自コマンドを呼ぶ。
-  キーバインドの `when` に `config.vsc-smith.markdown.listContinuation` を入れて on/off に追従させる。
-- 「現在行と行頭からカーソルまでの文字列 → 挿入する文字列」を純粋関数にして、ユニットテストを厚くする。
+- `onEnterRules` は使わない。Enter / Tab / Shift+Tab は `when` 付きのキーバインドで独自コマンドに渡す。
+  - `appendText` は固定文字列なので、番号のインクリメント (`1.` → `2.`) ができない。
+  - `removeText` は新しい行のインデントを削るだけで、現在行は編集できない。空の項目で Enter したときに記号を消せない。
+  - 箇条書き (`-`, `*`, `+`, `>`) だけなら記号ごとのルールで書けるが、リスト継続のロジックが JSON と TS の
+    2 か所に分かれる。`setLanguageConfiguration` は他の拡張と後勝ちで競合するおそれもあるので、一部にも使わない。
+- 「現在行とカーソル位置 → 編集内容 | `null`」を純粋関数にして、ユニットテストを厚くする。
+  `null` は対象外を表し、コマンドはフォールバックする。
+- フォールバックは `vscode.commands.executeCommand('type', { source: 'keyboard', text: '\n' })` とする。
+  通常の Enter と同じ経路を通るので、インデント継承・括弧の間での改行・Vim 拡張などの `type` フックを壊さない。
+  Tab / Shift+Tab は `tab` / `outdent` にフォールバックする。
+- 選択範囲があるとき、カーソルがリスト記号より前にあるときは対象外とする。
+- 編集は `editor.edit(..., { undoStopBefore: true, undoStopAfter: true })` で 1 回にまとめ、Ctrl+Z 1 回で戻せるようにする。
+  `insertSnippet` はスニペットモードに入り Tab の挙動が変わるので使わない。
+- キーバインドの `when` は次のとおり。
+  `editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.listContinuation
+  && !suggestWidgetVisible && !inlineSuggestionVisible && !editorHasMultipleSelections && !inSnippetMode
+  && !vsc-smith.markdown.yieldToMaio`
+  - マルチカーソルは当面対象外とする。
+  - 「リスト行にいるときだけ Enter を奪う」コンテキストキーを `setContext` で更新する案は採らない。
+    更新が非同期で古い値が残りうるため、フォールバック方式の方が単純で確実。
 
-### 標準の Markdown との共存 (最初に確認すること)
+### 標準の Markdown との共存
 
-- 組み込み markdown の言語設定に `onEnterRules` があるか、あるなら何をしているか。
-  Enter を独自コマンドで奪うとそれが効かなくなるので、同等の挙動を持つ必要があるか確認する。
-- 組み込みの Tab / Shift+Tab、Enter 系のキーバインド (`markdown.*` コマンド) との衝突。
-- 補完候補表示中・スニペット展開中・IME 変換中の Enter を奪わないこと (`when` 句で除外できるか)。
-- Markdown All in One など既存拡張と併用した場合の優先順位 (後勝ちになるか) と、README での注意書き。
+組み込みの調査結果 (microsoft/vscode の `extensions/markdown-basics`, `extensions/markdown-language-features`)。
+
+- 言語設定は `markdown-basics/language-configuration.json` にあり、`onEnterRules` と `indentationRules` は無い。
+  組み込みの Enter はインデント継承と、`brackets` による括弧の間での改行だけ。
+  - Enter を奪っても、フォールバックで `type` を呼べばどちらも保たれる。同等の挙動を自前で持つ必要は無い。
+- `[`, `(`, `{`, `<` の自動閉じは `autoClosingPairs`、選択範囲の囲み (`` ` ``, `*`, `_`, `~`, `$` など) は
+  `surroundingPairs` が担う。`` ` ``, `*`, `_` は自動閉じしない。この拡張では言語設定に触れず、組み込みに任せる。
+  - `contributes.languages` で markdown の `configuration` を自前で宣言すると組み込み全体を置き換えてしまうので、宣言しない。
+- `markdown-language-features` は言語設定を持たず、リンク先のパス補完・ペースト時のリンク更新・リンク挿入コマンドを
+  Provider やコマンドで提供している。Enter / Tab のキーバインドとは衝突しない。
+- IME 変換中の Enter はキーバインドに渡らないはず。Extension Development Host で確認する。
+
+### Markdown All in One との共存
+
+Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継続・Tab でのインデント・タスクリスト継続を
+既に持ち、この機能より高機能。この機能は「MAIO を入れたくない人向けの軽量な代替」と位置づけ、MAIO があれば譲る。
+
+- 同じキーに複数の拡張がバインドしたときの優先順位は保証されていないので、後勝ちには頼らない。
+- `activate` で `vscode.extensions.getExtension('yzhang.markdown-all-in-one')` を調べ、
+  コンテキストキー `vsc-smith.markdown.yieldToMaio` を `setContext` で立てる。キーバインドの `when` で除外する。
+  - `vscode.extensions.onDidChange` を購読して、MAIO の有効化・無効化に追従する。
+  - 設定 `vsc-smith.markdown.yieldToMarkdownAllInOne` (既定 `true`) を用意し、`false` なら譲らない。
+    コンテキストキーは「MAIO が有効、かつこの設定が `true`」のときだけ立てる。
+- MAIO 側の設定でリスト継続だけを切っている場合は検出しない。その場合は上の設定を `false` にしてもらう。
+  README に書く。
+- 確認すること:
+  - 無効化された拡張を `getExtension` が返さないこと。
+  - MAIO の Enter / Tab のコマンド名と `when` (`markdown.extension.onEnterKey` などのはず)。
+    この方式は MAIO の `when` に依存しないが、README の説明のために確認する。
 
 ## 5. GFM サポート (`gfm`, 優先度低)
 

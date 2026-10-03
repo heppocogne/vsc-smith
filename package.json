@@ -10,38 +10,104 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:vsc-smith.copyRelativePath.slash",
+    "onCommand:vsc-smith.copyRelativePath.backslash"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "configuration": {
-      "title": "VSCodeSmith",
-      "properties": {
-        "vsc-smith.fileSize.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "file-size: ファイルサイズ表示機能を有効にする"
-        },
-        "vsc-smith.fileSize.statusBar": {
-          "type": "boolean",
-          "default": true,
-          "description": "file-size: アクティブなファイルのサイズをステータスバーに表示する"
-        },
-        "vsc-smith.fileSize.statusBarAlignment": {
-          "type": "string",
-          "enum": [
-            "left",
-            "right"
-          ],
-          "default": "left",
-          "description": "file-size: ステータスバー上の表示位置 (右側はテキストファイルで行/列・エンコーディングなどの項目と並ぶため、既定は左)"
-        },
-        "vsc-smith.fileSize.explorerTooltip": {
-          "type": "boolean",
-          "default": true,
-          "description": "file-size: エクスプローラーでファイルにホバーした時のツールチップにサイズを表示する"
+    "configuration": [
+      {
+        "title": "File Size",
+        "properties": {
+          "vsc-smith.fileSize.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "file-size: ファイルサイズ表示機能を有効にする"
+          },
+          "vsc-smith.fileSize.statusBar": {
+            "type": "boolean",
+            "default": true,
+            "description": "file-size: アクティブなファイルのサイズをステータスバーに表示する"
+          },
+          "vsc-smith.fileSize.statusBarAlignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ],
+            "default": "left",
+            "description": "file-size: ステータスバー上の表示位置 (右側はテキストファイルで行/列・エンコーディングなどの項目と並ぶため、既定は左)"
+          },
+          "vsc-smith.fileSize.explorerTooltip": {
+            "type": "boolean",
+            "default": true,
+            "description": "file-size: エクスプローラーでファイルにホバーした時のツールチップにサイズを表示する"
+          }
+        }
+      },
+      {
+        "title": "Copy Path",
+        "properties": {
+          "vsc-smith.copyPath.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "copy-path: 相対パスを、標準の \"Copy Relative Path\" (explorer.copyRelativePathSeparator) とは逆の区切り文字でコピーするコマンドを有効にする (標準が / なら \\ 区切り、\\ なら / 区切り)"
+          }
         }
       }
+    ],
+    "commands": [
+      {
+        "command": "vsc-smith.copyRelativePath.slash",
+        "title": "Copy Relative Path (/)",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.copyRelativePath.backslash",
+        "title": "Copy Relative Path (\\)",
+        "category": "VSCodeSmith"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "vsc-smith.copyRelativePath.slash",
+          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))"
+        },
+        {
+          "command": "vsc-smith.copyRelativePath.backslash",
+          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "vsc-smith.copyRelativePath.slash",
+          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))",
+          "group": "6_copypath",
+          "order": 60
+        },
+        {
+          "command": "vsc-smith.copyRelativePath.backslash",
+          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')",
+          "group": "6_copypath",
+          "order": 60
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "vsc-smith.copyRelativePath.slash",
+          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/')) && resourceScheme != untitled",
+          "group": "1_cutcopypaste",
+          "order": 60
+        },
+        {
+          "command": "vsc-smith.copyRelativePath.backslash",
+          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/') && resourceScheme != untitled",
+          "group": "1_cutcopypaste",
+          "order": 60
+        }
+      ]
     }
   },
   "scripts": {

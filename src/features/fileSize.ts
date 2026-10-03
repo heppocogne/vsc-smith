@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { activeTabUri } from '../util/editor';
 import { ToggleableFeature } from '../util/feature';
 import { formatExactBytes, formatFileSize } from '../util/format';
 
@@ -36,19 +37,6 @@ export async function statFile(uri: vscode.Uri): Promise<vscode.FileStat | undef
 	} catch {
 		return undefined;
 	}
-}
-
-function activeTabUri(): vscode.Uri | undefined {
-	const input = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
-	if (input instanceof vscode.TabInputText
-		|| input instanceof vscode.TabInputCustom
-		|| input instanceof vscode.TabInputNotebook) {
-		return input.uri;
-	}
-	if (input instanceof vscode.TabInputTextDiff || input instanceof vscode.TabInputNotebookDiff) {
-		return input.modified;
-	}
-	return undefined;
 }
 
 export class FileSizeStatusBar implements vscode.Disposable {

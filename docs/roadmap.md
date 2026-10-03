@@ -43,7 +43,7 @@
 | 1 | ファイルサイズ表示 | `vsc-smith.fileSize` | 実装・自動テスト済み・未コミット |
 | 2 | ~~バイナリファイルの読み込みスキップ~~ | — | 取り下げ (実機でピッカーが挟まり使い勝手が悪い) |
 | 3 | ~~拡張子別のデフォルトエンコーディング~~ | — | 取り下げ (標準機能で代替) |
-| 4 | Markdown 自動インデント | `vsc-smith.markdown` | 未着手 |
+| 4 | Markdown 自動インデント | `vsc-smith.markdown` | 実装・自動テスト済み・未コミット |
 | 5 | GFM サポート (プレビュー・補完) | `vsc-smith.gfm` | 未着手 (優先度低) |
 | 6 | 区切り文字を指定したパスのコピー | `vsc-smith.copyPath` | 実装・自動テスト済み・未コミット |
 
@@ -100,8 +100,15 @@
 
 ### 機能
 
-- Enter で箇条書き (`-`, `*`, `+`)・番号付きリスト・引用 (`>`) を継続し、空の項目で Enter したら記号を消す。
-- Tab / Shift+Tab でリスト項目をインデント/アウトデント。
+- Enter で箇条書き (`-`, `*`, `+`)・番号付きリスト (`1.`, `1)`)・タスクリスト・引用 (`>`) を継続する。
+  - 番号は 1 つ増やす。タスクリストは `[ ] ` (未チェック) で継続する。後続項目の番号の振り直しはしない。
+  - 本文の途中で Enter したら、カーソル以降を次の項目に移す。
+  - 空の項目で Enter したら、ネストしていれば 1 段アウトデントし、トップレベルなら記号を消す。
+    空の引用行 (`> `) では一番内側の `>` を消す。
+- Tab / Shift+Tab で、カーソルが項目内 (記号より後ろ) のどこにあってもリスト項目の行全体をインデント/アウトデントする。
+  - 幅は `editor.tabSize` / `insertSpaces` に従う。
+  - Tab でネストした番号付き項目は `1.` に振り直す。Shift+Tab では番号を変えない。
+- コードブロック (```` ``` ```` / `~~~`) の中と、区切り線 (`* * *` など) は対象外。フェンスは文書の先頭から数える。
 
 ### 方針
 
@@ -119,10 +126,11 @@
 - 編集は `editor.edit(..., { undoStopBefore: true, undoStopAfter: true })` で 1 回にまとめ、Ctrl+Z 1 回で戻せるようにする。
   `insertSnippet` はスニペットモードに入り Tab の挙動が変わるので使わない。
 - キーバインドの `when` は次のとおり。
-  `editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.listContinuation
-  && !suggestWidgetVisible && !inlineSuggestionVisible && !editorHasMultipleSelections && !inSnippetMode
+  `editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled
+  && !editorHasSelection && !suggestWidgetVisible && !inlineSuggestionVisible && !editorHasMultipleSelections && !inSnippetMode
   && !vsc-smith.markdown.yieldToMaio`
   - マルチカーソルは当面対象外とする。
+  - Tab / Shift+Tab にはさらに `!editorTabMovesFocus` を、Tab には `!inlineEditIsVisible` を加える。
   - 「リスト行にいるときだけ Enter を奪う」コンテキストキーを `setContext` で更新する案は採らない。
     更新が非同期で古い値が残りうるため、フォールバック方式の方が単純で確実。
 
@@ -158,6 +166,24 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
   - MAIO の Enter / Tab のコマンド名と `when` (`markdown.extension.onEnterKey` などのはず)。
     この方式は MAIO の `when` に依存しないが、README の説明のために確認する。
 
+### 実装
+
+- `src/features/markdown/listEdit.ts`: 行の分解と Enter / Tab / Shift+Tab の編集内容、フェンスの判定 (純粋関数)。
+- `src/features/markdown/index.ts`: 3 つのコマンド (`vsc-smith.markdown.onEnter` / `onTab` / `onShiftTab`) と
+  MAIO に譲るためのコンテキストキー。どちらも `ToggleableFeature` で生成/破棄する。
+- 設定は `vsc-smith.markdown.enabled` と `vsc-smith.markdown.yieldToMarkdownAllInOne`。
+
+### テスト
+
+- 自動 (`src/test/markdown.test.ts`): 行の分解、Enter / Tab / Shift+Tab の編集内容、フェンスの判定、
+  コマンドの編集・フォールバック・CRLF の文書・1 回の undo で戻ること、無効化でコマンドが外れること。
+
+### 残作業
+
+- [ ] 手動確認: 実際のキー入力で Enter / Tab / Shift+Tab が効くこと、IME 変換中の Enter、補完候補表示中の Enter/Tab、
+      MAIO を入れたときに譲ること (`yieldToMarkdownAllInOne` の切り替えも)、Vim 拡張との共存。
+- [ ] README に MAIO との関係を書く。
+
 ## 5. GFM サポート (`gfm`, 優先度低)
 
 ### プレビュー
@@ -171,7 +197,7 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
 
 ### 補完
 
-- タスクリスト `- [ ] ` の継続を 4 のリスト継続に追加する。
+- タスクリスト `- [ ] ` の継続は 4 で実装済み。
 - 表の整形はスコープ外 (必要になったら検討)。
 
 ## 6. 区切り文字を指定したパスのコピー (`copyPath`)
@@ -202,4 +228,4 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
 
 1. 1・2 の手動確認と、Open Anyway の制約・アンインストール時の残留エントリへの対処方針を決める。
 2. 1・2 を機能ごとにコミットする。
-3. 4 のスパイク: 組み込み markdown の Enter/Tab 挙動とキーバインドを調べ、共存方法を確定する。
+3. 4 の手動確認 (Extension Development Host) とコミット。

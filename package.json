@@ -12,7 +12,10 @@
   "activationEvents": [
     "onStartupFinished",
     "onCommand:vsc-smith.copyRelativePath.slash",
-    "onCommand:vsc-smith.copyRelativePath.backslash"
+    "onCommand:vsc-smith.copyRelativePath.backslash",
+    "onCommand:vsc-smith.markdown.onEnter",
+    "onCommand:vsc-smith.markdown.onTab",
+    "onCommand:vsc-smith.markdown.onShiftTab"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -53,6 +56,21 @@
             "type": "boolean",
             "default": true,
             "description": "copy-path: 相対パスを、標準の \"Copy Relative Path\" (explorer.copyRelativePathSeparator) とは逆の区切り文字でコピーするコマンドを有効にする (標準が / なら \\ 区切り、\\ なら / 区切り)"
+          }
+        }
+      },
+      {
+        "title": "Markdown",
+        "properties": {
+          "vsc-smith.markdown.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "markdown: Enter で箇条書き・番号付きリスト・タスクリスト・引用を継続し、Tab / Shift+Tab でリスト項目をインデント/アウトデントする"
+          },
+          "vsc-smith.markdown.yieldToMarkdownAllInOne": {
+            "type": "boolean",
+            "default": true,
+            "description": "markdown: Markdown All in One が有効なときは、同等の機能を持つそちらに Enter / Tab / Shift+Tab を譲る (Markdown All in One 側でリスト継続を無効にしている場合は false にする)"
           }
         }
       }
@@ -108,7 +126,24 @@
           "order": 60
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "key": "enter",
+        "command": "vsc-smith.markdown.onEnter",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio"
+      },
+      {
+        "key": "tab",
+        "command": "vsc-smith.markdown.onTab",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus && !inlineEditIsVisible"
+      },
+      {
+        "key": "shift+tab",
+        "command": "vsc-smith.markdown.onShiftTab",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run check-types
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: xvfb-run -a npm test
+      - name: Package VSIX
+        run: npx --yes @vscode/vsce package --no-dependencies -o vsc-smith.vsix
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: '*.vsix'
+          generate_release_notes: true

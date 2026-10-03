@@ -34,6 +34,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'node',
+		target: 'node16',	// VSCode 1.70系に対応するため
 		outfile: 'dist/extension.js',
 		external: ['vscode'],
 		logLevel: 'silent',

@@ -1,7 +1,12 @@
 # VSCodeSmith
 ![](https://github.com/heppocogne/vsc-smith/actions/workflows/ci.yaml/badge.svg)
 
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Claude](https://img.shields.io/badge/claude-%23D97757.svg?style=for-the-badge&logo=claude&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
+
 雑多な拡張機能集です。
+VSCode 1.70以降を想定しています。
 
 ## 機能
 

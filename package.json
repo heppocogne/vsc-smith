@@ -40,62 +40,9 @@
           "type": "boolean",
           "default": true,
           "description": "file-size: エクスプローラーでファイルにホバーした時のツールチップにサイズを表示する"
-        },
-        "vsc-smith.binaryBlocker.enabled": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "binary-blocker: 指定拡張子のファイルを読み込まずにプレースホルダーを表示する。`workbench.editorAssociations` (ユーザー設定) にエントリを追加/削除して実現する"
-        },
-        "vsc-smith.binaryBlocker.extensions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [
-            ".exe",
-            ".dll",
-            ".so",
-            ".dylib",
-            ".o",
-            ".obj",
-            ".a",
-            ".lib",
-            ".pdb",
-            ".ilk",
-            ".exp",
-            ".bin",
-            ".class",
-            ".pyc",
-            ".pyd",
-            ".wasm",
-            ".zip",
-            ".7z",
-            ".gz",
-            ".tgz",
-            ".xz",
-            ".bz2",
-            ".tar",
-            ".rar",
-            ".jar",
-            ".iso",
-            ".msi"
-          ],
-          "description": "binary-blocker: バイナリとして扱う拡張子 (例: \".exe\")"
         }
       }
-    },
-    "customEditors": [
-      {
-        "viewType": "vsc-smith.binaryBlocker",
-        "displayName": "Binary Blocker",
-        "selector": [
-          {
-            "filenamePattern": "*"
-          }
-        ],
-        "priority": "option"
-      }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

@@ -13,8 +13,7 @@
 - on/off 対応は `ToggleableFeature` (`src/util/feature.ts`) に任せる。
   有効化時に機能のインスタンスを作り、無効化時や設定変更時に dispose → 再生成する。
   機能側は「コンストラクタで登録し、`dispose` で全部外す」だけを守ればよい。
-- `ToggleableFeature` に乗らない機能 (binaryBlocker のようにユーザー設定を書き換えるもの、
-  markdown-it プラグインのように一度しか登録できないもの) は、その理由を機能のコメントに書く。
+- `ToggleableFeature` に乗らない機能 (markdown-it プラグインのように一度しか登録できないもの) は、その理由を機能のコメントに書く。
 
 ### 設定 (package.json)
 
@@ -42,7 +41,7 @@
 | # | 機能 | 設定セクション | 状態 |
 |---|------|----------------|------|
 | 1 | ファイルサイズ表示 | `vsc-smith.fileSize` | 実装・自動テスト済み・未コミット |
-| 2 | バイナリファイルの読み込みスキップ | `vsc-smith.binaryBlocker` | 実装・自動テスト済み・未コミット |
+| 2 | ~~バイナリファイルの読み込みスキップ~~ | — | 取り下げ (実機でピッカーが挟まり使い勝手が悪い) |
 | 3 | ~~拡張子別のデフォルトエンコーディング~~ | — | 取り下げ (標準機能で代替) |
 | 4 | Markdown 自動インデント | `vsc-smith.markdown` | 未着手 |
 | 5 | GFM サポート (プレビュー・補完) | `vsc-smith.gfm` | 未着手 (優先度低) |
@@ -74,43 +73,15 @@
       問題があれば watcher をやめ、エクスプローラーの再描画任せにする。
 - [ ] 未保存の変更があるときに「保存済みのサイズ」を出していることを明示するか検討 (tooltip に一言など)。
 
-## 2. バイナリファイルの読み込みスキップ (`binaryBlocker`)
+## 2. バイナリファイルの読み込みスキップ (取り下げ)
 
-### 実装
+`workbench.editorAssociations` で拡張子をプレースホルダーのカスタムエディターに振り分け、
+「Open Anyway」で開く方式を実装したが、実機確認で取り下げた。
 
-- `customEditors` の `selector` は package.json に静的に書くしかなく、設定から拡張子を変えられない。
-  そのため selector は `*` + `priority: "option"` にしておき、ユーザー設定の
-  `workbench.editorAssociations` に `"*.exe": "vsc-smith.binaryBlocker"` のようなエントリを追加/削除して切り替える。
-- 自分で追加したエントリは `globalState` に記録し、ユーザーが自分で設定したエントリには触らない。
-- プレースホルダーの Webview はファイル本体を読まず、`stat` のサイズだけ表示する。
-  「Open Anyway」で `vscode.openWith(uri, 'default')` し、プレースホルダーのタブを閉じる。
-
-### 既知のトレードオフ
-
-- ユーザーの `settings.json` を書き換える。Settings Sync 経由で他の環境にも同期される。
-- 拡張機能をアンインストールしてもエントリが残る (アンインストール時に設定 API は使えない)。
-  残ったエントリの扱いを確認し、必要なら README に「無効化してからアンインストール」と書くか、
-  エントリを掃除するコマンド (`vsc-smith.binaryBlocker.cleanup`) を用意する。
-
-### テスト
-
-- 自動 (`src/test/binaryBlocker.test.ts`): `toPattern`、既定拡張子の登録、プレースホルダーで開くこと
-  (拡張子の大文字小文字を区別しない)、対象外のファイルに影響しないこと、拡張子リストの変更・無効化への追従、
-  ユーザー自身の関連付けに触らないこと、Open Anyway でテキストエディタに置き換わること。
-
-### Open Anyway の制約 (テストで確認済み)
-
-- 中身が本当にバイナリのファイルは、Open Anyway を押しても VS Code 標準の「バイナリなので表示しません」画面になる。
-  拡張機能の API (`openTextDocument` / `vscode.openWith(uri, 'default')`) ではテキストとして強制的に開けないため
-  (`File seems to be binary and cannot be opened as text`)。ユーザーはもう一度 Open Anyway を押すことになる。
-- 対処案: (a) 制約として受け入れ README に書く、(b) Hex Editor (`ms-vscode.hexeditor`) が入っていれば
-  「Open in Hex Editor」ボタンも出す。
-
-### 残作業
-
-- [ ] 上記 Open Anyway の制約への対処を決める。
-- [ ] 手動確認: プレースホルダー画面の見た目 (テーマ追従)、Webview のボタンから実際に開けること。
-- [ ] アンインストール時の残留エントリの対処を決める。
+- 中身が本当にバイナリのファイルは、拡張機能 API ではテキストとして強制的に開けない。
+  プレースホルダーの Open Anyway の後に VS Code 標準の「バイナリなので表示しません」画面が出て、
+  その Open Anyway でエディターの選択ピッカー (Text Editor / Binary Blocker) が出るため、3手順になる。
+- 実装は削除した (コミット 3280013 に残っている)。
 
 ## 3. 拡張子別のデフォルトエンコーディング (取り下げ)
 

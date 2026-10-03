@@ -100,6 +100,22 @@ suite('gfm alert', () => {
 		assert.ok(html.includes('<p>text</p>'));
 	});
 
+	test('inside list items', () => {
+		for (const source of [
+			'- > [!NOTE]\n  > body\n',
+			'* item\n\n     > [!NOTE]\n     > body\n',
+			'1. item\n   - nested\n\n     > [!NOTE]\n     > body\n',
+		]) {
+			const html = render(source);
+			assert.ok(html.includes('<blockquote class="markdown-alert markdown-alert-note">\n<p class="markdown-alert-title">Note</p>\n<p>body</p>'), source);
+		}
+	});
+
+	test('alert after a nested blockquote', () => {
+		const html = render('> > quoted\n\n> [!TIP]\n> body\n');
+		assert.strictEqual(html.match(/markdown-alert-tip/g)?.length, 1);
+	});
+
 	test('not an alert', () => {
 		for (const source of [
 			'> [!NOTE]\n',
@@ -108,7 +124,10 @@ suite('gfm alert', () => {
 			'> \\[!NOTE]\n> body\n',
 			'> text\n> [!NOTE]\n',
 			'> > [!NOTE]\n> > body\n',
-			'- > [!NOTE]\n  > body\n',
+			'> text\n>\n> > [!NOTE]\n> > body\n',
+			'- > > [!NOTE]\n  > > body\n',
+			'    > [!NOTE]\n    > body\n',
+			'>\n',
 			'[!NOTE]\nbody\n',
 		]) {
 			assert.ok(!render(source).includes('markdown-alert'), source);

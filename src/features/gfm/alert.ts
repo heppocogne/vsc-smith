@@ -19,12 +19,19 @@ export function alertPlugin(md: MarkdownIt, isEnabled: () => boolean): void {
 		}
 		const tokens = state.tokens;
 		// Backwards, so that the tokens inserted and removed below do not shift the ones still to be visited.
-		for (let i = tokens.length - 5; i >= 0; i--) {
+		let depth = 0;
+		for (let i = tokens.length - 1; i >= 0; i--) {
 			const quote = tokens[i];
+			if (quote.type === 'blockquote_close') {
+				depth++;
+			}
+			if (quote.type !== 'blockquote_open') {
+				continue;
+			}
+			depth--;
 			const inline = tokens[i + 2];
-			// GitHub does not render alerts nested in lists or other blockquotes.
-			if (quote.type !== 'blockquote_open' || quote.level !== 0
-				|| tokens[i + 1].type !== 'paragraph_open' || inline.type !== 'inline') {
+			// Alerts may sit in a list item, but not in another blockquote (`depth` counts the enclosing ones).
+			if (depth !== 0 || tokens[i + 1].type !== 'paragraph_open' || inline?.type !== 'inline') {
 				continue;
 			}
 			const match = MARKER.exec(inline.content);

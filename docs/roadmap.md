@@ -195,7 +195,8 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
   記号の後ろに空白と本文が必要。`li` に `task-list-item`、親リストに `contains-task-list` を付ける。
 - アラート: `[!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]` (大文字小文字は区別しない) が
   引用の 1 行目に単独であるとき、引用に `markdown-alert markdown-alert-<種類>` を付け、タイトル行を足す。
-  GitHub に合わせ、リストや引用の中にネストしたもの、本文が無いものは対象外。アイコンは付けない。
+  リスト項目の中の引用は対象にする (Markdown All in One と同じ。GitHub は対象外)。
+  別の引用の中にネストしたもの、本文が無いものは対象外。アイコンは付けない。
 
 ### 方針
 

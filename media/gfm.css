@@ -1,0 +1,41 @@
+.task-list-item {
+	list-style-type: none;
+}
+
+.task-list-item-checkbox {
+	margin: 0 0.2em 0.25em -1.4em;
+	vertical-align: middle;
+}
+
+.vscode-body blockquote.markdown-alert {
+	--alert-color: var(--vscode-charts-blue, #0969da);
+	border-left-color: var(--alert-color);
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.vscode-body blockquote.markdown-alert-tip {
+	--alert-color: var(--vscode-charts-green, #1a7f37);
+}
+
+.vscode-body blockquote.markdown-alert-important {
+	--alert-color: var(--vscode-charts-purple, #8250df);
+}
+
+.vscode-body blockquote.markdown-alert-warning {
+	--alert-color: var(--vscode-charts-yellow, #9a6700);
+}
+
+.vscode-body blockquote.markdown-alert-caution {
+	--alert-color: var(--vscode-charts-red, #cf222e);
+}
+
+.markdown-alert > .markdown-alert-title {
+	color: var(--alert-color);
+	font-weight: 600;
+	margin-top: 0;
+}
+
+.markdown-alert > :last-child {
+	margin-bottom: 0;
+}

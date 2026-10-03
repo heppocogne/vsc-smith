@@ -44,7 +44,7 @@
 | 2 | ~~バイナリファイルの読み込みスキップ~~ | — | 取り下げ (実機でピッカーが挟まり使い勝手が悪い) |
 | 3 | ~~拡張子別のデフォルトエンコーディング~~ | — | 取り下げ (標準機能で代替) |
 | 4 | Markdown 自動インデント | `vsc-smith.markdown` | 実装・自動テスト済み・未コミット |
-| 5 | GFM サポート (プレビュー・補完) | `vsc-smith.gfm` | 未着手 (優先度低) |
+| 5 | GFM サポート (プレビュー・補完) | `vsc-smith.gfm` | プレビューを実装・自動テスト済み・未コミット |
 | 6 | 区切り文字を指定したパスのコピー | `vsc-smith.copyPath` | 実装・自動テスト済み・未コミット |
 
 ---
@@ -184,16 +184,49 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
       MAIO を入れたときに譲ること (`yieldToMarkdownAllInOne` の切り替えも)、Vim 拡張との共存。
 - [ ] README に MAIO との関係を書く。
 
-## 5. GFM サポート (`gfm`, 優先度低)
+## 5. GFM サポート (`gfm`)
 
 ### プレビュー
 
-- 組み込みのプレビュー (markdown-it) は表・取り消し線に対応済み。足りないのはタスクリストのチェックボックス、
-  脚注、アラート (`> [!NOTE]`) など。実装前に現行バージョンで何が足りないか確認する。
-- `contributes."markdown.markdownItPlugins": true` を宣言し、`activate` から `{ extendMarkdownIt(md) }` を返して
-  markdown-it プラグインを追加する。スタイルは `markdown.previewStyles` で足す。
-- `extendMarkdownIt` は一度しか呼ばれないので `ToggleableFeature` には乗らない。
-  プラグインの中で毎回設定を読み、無効なら素通りさせる。
+組み込みのプレビュー (markdown-it) は表・取り消し線に対応済み。タスクリストのチェックボックスとアラートを足す。
+脚注・絵文字ショートコードは対象外 (必要になったら検討)。
+
+- タスクリスト: リスト項目の先頭の `[ ]` / `[x]` / `[X]` を無効化したチェックボックスに置き換える。
+  記号の後ろに空白と本文が必要。`li` に `task-list-item`、親リストに `contains-task-list` を付ける。
+- アラート: `[!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]` (大文字小文字は区別しない) が
+  引用の 1 行目に単独であるとき、引用に `markdown-alert markdown-alert-<種類>` を付け、タイトル行を足す。
+  リスト項目の中の引用は対象にする (Markdown All in One と同じ。GitHub は対象外)。
+  別の引用の中にネストしたもの、本文が無いものは対象外。アイコンは付けない。
+
+### 方針
+
+- `contributes."markdown.markdownItPlugins": true` を宣言し、`activate` から `{ extendMarkdownIt(md) }` を返す。
+- `extendMarkdownIt` は一度しか呼ばれず、足したルールは外せないので `ToggleableFeature` には乗らない。
+  ルールが実行のたびに `vsc-smith.gfm.enabled` を読み、無効なら何もしない。
+  設定が変わったら `markdown.preview.refresh` を呼んで、開いているプレビューに反映する。
+- プラグインは既存の npm パッケージを使わず自前で書き、ランタイム依存を持たない。
+  どちらも markdown-it のコアルールで、末尾 (`text_join` の後) に足す。渡された `md` と `state.Token` だけを使う。
+  - `markdown-it` と `@types/markdown-it` は devDependencies (型とテスト用)。バンドルには入らない。
+  - markdown-it 15 は同梱の型定義がこの tsconfig (CommonJS + Node16) でエラーになるため、14 を使う。
+- エスケープした `\[ ]` や `\[!NOTE]` を拾わないよう、トークンだけでなく元のソース (`inline.content`) も照合する。
+- スタイルは `media/gfm.css` を `markdown.previewStyles` で足す。追加した要素だけを対象にし、
+  色は `--vscode-charts-*` (無ければ GitHub の色) を使う。無効時もクラスが付かないので影響しない。
+
+### 実装
+
+- `src/features/gfm/taskList.ts` / `alert.ts`: markdown-it プラグイン (`vscode` に依存しない。有効判定は関数で受け取る)。
+- `src/features/gfm/index.ts`: `registerGfm(context)` が `{ extendMarkdownIt }` を返す。設定変更でプレビューを更新する。
+
+### テスト
+
+- 自動 (`src/test/gfm.test.ts`): 実物の markdown-it に通した HTML (タスクリスト・アラートの対象/対象外、無効時)、
+  `activate` の戻り値が設定に追従すること。
+
+### 残作業
+
+- [ ] 手動確認: 実際のプレビューでチェックボックスとアラートが出ること、ライト/ダーク/ハイコントラストでの色、
+      設定の切り替えが開いているプレビューに反映されること、プレビューのスクロール同期が崩れないこと。
+- [ ] 組み込みのプレビューが将来アラートなどに対応したら、重複しないか確認する。
 
 ### 補完
 

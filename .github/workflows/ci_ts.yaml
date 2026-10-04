@@ -1,4 +1,4 @@
-name: CI
+name: vsc-smith CI for Typescript
 
 on:
   push:

@@ -1,0 +1,16 @@
+.vscode-body pre.vsc-smith-mermaid-diagram {
+	background: none;
+	padding: 0;
+	text-align: center;
+}
+
+.vsc-smith-mermaid-diagram > svg {
+	max-width: 100%;
+	height: auto;
+}
+
+.vsc-smith-mermaid-message {
+	color: var(--vscode-errorForeground, #cf222e);
+	margin-bottom: 0.5em;
+	white-space: pre-wrap;
+}

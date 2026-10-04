@@ -84,11 +84,30 @@
             "description": "gfm: Markdown プレビューでタスクリストのチェックボックスとアラート (> [!NOTE] など) を表示する"
           }
         }
+      },
+      {
+        "title": "Mermaid",
+        "properties": {
+          "vsc-smith.mermaid.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "mermaid: Markdown プレビューで mermaid のコードブロックを図として表示する"
+          },
+          "vsc-smith.mermaid.yieldToOtherExtensions": {
+            "type": "boolean",
+            "default": true,
+            "description": "mermaid: VS Code 標準の Mermaid 表示 (1.121 以降の Mermaid Markdown Features) か Markdown Preview Mermaid Support が有効なときは、そちらに表示を譲る"
+          }
+        }
       }
     ],
     "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
-      "./media/gfm.css"
+      "./media/gfm.css",
+      "./media/mermaid.css"
+    ],
+    "markdown.previewScripts": [
+      "./media/mermaid.js"
     ],
     "commands": [
       {
@@ -195,5 +214,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/heppocogne/vsc-smith.git"
+  },
+  "dependencies": {
+    "mermaid": "^12.1.0"
   }
 }

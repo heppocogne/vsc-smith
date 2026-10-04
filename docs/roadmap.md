@@ -38,14 +38,15 @@
 
 ## 機能一覧と進捗
 
-| # | 機能 | 設定セクション | 状態 |
-|---|------|----------------|------|
-| 1 | ファイルサイズ表示 | `vsc-smith.fileSize` | 実装・自動テスト済み・未コミット |
-| 2 | ~~バイナリファイルの読み込みスキップ~~ | — | 取り下げ (実機でピッカーが挟まり使い勝手が悪い) |
-| 3 | ~~拡張子別のデフォルトエンコーディング~~ | — | 取り下げ (標準機能で代替) |
-| 4 | Markdown 自動インデント | `vsc-smith.markdown` | 実装・自動テスト済み・未コミット |
-| 5 | GFM サポート (プレビュー・補完) | `vsc-smith.gfm` | プレビューを実装・自動テスト済み・未コミット |
-| 6 | 区切り文字を指定したパスのコピー | `vsc-smith.copyPath` | 実装・自動テスト済み・未コミット |
+| #   | 機能                                     | 設定セクション       | 状態                                            |
+| --- | ---------------------------------------- | -------------------- | ----------------------------------------------- |
+| 1   | ファイルサイズ表示                       | `vsc-smith.fileSize` | 実装・自動テスト済み                            |
+| 2   | ~~バイナリファイルの読み込みスキップ~~   | —                    | 取り下げ (実機でピッカーが挟まり使い勝手が悪い) |
+| 3   | ~~拡張子別のデフォルトエンコーディング~~ | —                    | 取り下げ (標準機能で代替)                       |
+| 4   | Markdown 自動インデント                  | `vsc-smith.markdown` | 実装・自動テスト済み                            |
+| 5   | GFM サポート (プレビュー・補完)          | `vsc-smith.gfm`      | プレビューを実装・自動テスト済み                |
+| 6   | 区切り文字を指定したパスのコピー         | `vsc-smith.copyPath` | 実装                                            |
+| 7   | Mermaid プレビュー                       | `vsc-smith.mermaid`  | 実装・自動テスト済み                            |
 
 ---
 
@@ -65,14 +66,6 @@
 - 自動 (`src/test/fileSize.test.ts`): `statFile` (ファイル/ディレクトリ/存在しない/untitled)、
   デコレーションの tooltip、ステータスバーの表示・保存後の更新・外部変更の反映・タブ切り替えへの追従、
   `ToggleableFeature` の生成/破棄。
-
-### 残作業
-
-- [ ] 手動確認: エクスプローラーのホバーで実際にサイズが出ること、ステータスバーの左右切り替え、
-      ファイルでないタブ (設定画面など) で非表示になること、diff エディタ、リモート (WSL/SSH) のファイル。
-- [ ] 大規模ワークスペースでの負荷確認。`**/*` の watcher とエクスプローラー表示ごとの `stat` が重くないか。
-      問題があれば watcher をやめ、エクスプローラーの再描画任せにする。
-- [ ] 未保存の変更があるときに「保存済みのサイズ」を出していることを明示するか検討 (tooltip に一言など)。
 
 ## 2. バイナリファイルの読み込みスキップ (取り下げ)
 
@@ -178,12 +171,6 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
 - 自動 (`src/test/markdown.test.ts`): 行の分解、Enter / Tab / Shift+Tab の編集内容、フェンスの判定、
   コマンドの編集・フォールバック・CRLF の文書・1 回の undo で戻ること、無効化でコマンドが外れること。
 
-### 残作業
-
-- [ ] 手動確認: 実際のキー入力で Enter / Tab / Shift+Tab が効くこと、IME 変換中の Enter、補完候補表示中の Enter/Tab、
-      MAIO を入れたときに譲ること (`yieldToMarkdownAllInOne` の切り替えも)、Vim 拡張との共存。
-- [ ] README に MAIO との関係を書く。
-
 ## 5. GFM サポート (`gfm`)
 
 ### プレビュー
@@ -222,11 +209,6 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
 - 自動 (`src/test/gfm.test.ts`): 実物の markdown-it に通した HTML (タスクリスト・アラートの対象/対象外、無効時)、
   `activate` の戻り値が設定に追従すること。
 
-### 残作業
-
-- [ ] 手動確認: 実際のプレビューでチェックボックスとアラートが出ること、ライト/ダーク/ハイコントラストでの色、
-      設定の切り替えが開いているプレビューに反映されること、プレビューのスクロール同期が崩れないこと。
-- [ ] 組み込みのプレビューが将来アラートなどに対応したら、重複しないか確認する。
 
 ### 補完
 
@@ -251,14 +233,52 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
 
 - 自動 (`src/test/copyPath.test.ts`): 区切り文字の変換、複数選択の扱い、2 コマンドのクリップボード出力、引数なし実行。
 
-### 残作業
 
-- [ ] 手動確認: ワークスペース内での相対パス、マルチルート、メニューの位置、Linux/macOS での表示。
+## 7. Mermaid プレビュー (`mermaid`)
 
----
+Markdown プレビューで `mermaid` のコードブロック (``` / ~~~) を図として表示する。GFM とは別の機能として扱う。
+ノートブック、エディター内の表示、画像への書き出し、拡大・縮小は対象外。
 
-## 次のステップ
+### 他の Mermaid 表示との共存
 
-1. 1・2 の手動確認と、Open Anyway の制約・アンインストール時の残留エントリへの対処方針を決める。
-2. 1・2 を機能ごとにコミットする。
-3. 4 の手動確認 (Extension Development Host) とコミット。
+VS Code 1.121 で Markdown Preview Mermaid Support (`bierner.markdown-mermaid`) が組み込みの拡張
+Mermaid Markdown Features (`vscode.mermaid-markdown-features`) として取り込まれた。
+この機能は「1.120 以前」か「組み込みを無効にしている」場合の代替と位置づけ、どちらかが有効なら譲る。
+
+- 設定 `vsc-smith.mermaid.yieldToOtherExtensions` (既定 `true`)。`false` なら譲らない。
+- 判定は `vscode.extensions.getExtension` で行い、markdown-it のルールが実行のたびに確かめる。
+  譲るときはフェンスに手を付けないので、相手の拡張がそのまま描画する。
+- 出力する要素のクラスは `vsc-smith-mermaid` とする。`mermaid` にすると他の拡張のスクリプトが拾い、二重に描画される。
+
+### 方針
+
+- 拡張ホスト側 (markdown-it): `fence` のレンダールールを包み、言語が `mermaid` のフェンスを
+  `<pre class="vsc-smith-mermaid">ソース</pre>` にする。ソースは HTML エスケープする。
+  - プレビューがトークンに付けた `data-line` と `code-line` (スクロール同期用) は引き継ぐ。
+  - プレビューは同じトークンを複数回レンダーするので、トークンは書き換えない。
+  - GFM と同じ理由で `ToggleableFeature` には乗らない。設定と拡張の増減でプレビューを更新する。
+- プレビュー側 (`contributes."markdown.previewScripts"` の `media/mermaid.js`、素の JS):
+  - 対象の要素が無ければ何もしない。mermaid 本体 (約 5MB) は図が初めて出たときに一度だけ読み込む。
+    譲っているときや無効時に本体を読み込まないため。
+  - 本体は `node_modules/mermaid/dist/mermaid.min.js` をそのまま読む。プレビューは拡張のフォルダー全体を
+    リソースルートにするので、コピーは要らない。`<script>` を足すときは、プレビューの CSP を通すために
+    自分の nonce を引き継ぐ。
+  - `securityLevel: "strict"`。テーマは `body` のクラスから決める (ライトは `default`、ダーク/ハイコントラストは `dark`)。
+  - プレビューの更新 (`vscode.markdown.updateContent`) とテーマの切り替え (`body` のクラスの変化) で描き直す。
+    結果をソースごとに覚えておき、変わっていない図は待たずに差し替える (更新のたびにちらつかないように)。
+  - 構文エラーはエラーメッセージの下に元のソースを出す。`render` はエラー時に図の残骸を文書に残すので、先に `parse` する。
+- `mermaid` は `dependencies` に入れる。バンドルはせず、`.vscodeignore` の
+  `!node_modules/mermaid/dist/mermaid.min.js` で vsix にはこの 1 ファイルだけ入れる。
+
+### 実装
+
+- `src/features/mermaid/plugin.ts`: markdown-it プラグイン (`vscode` に依存しない)。
+- `src/features/mermaid/index.ts`: `registerMermaid(context)` が `{ extendMarkdownIt }` を返す。譲るかどうかの判定。
+- `src/util/markdownPreview.ts`: GFM と共有する型とプレビューの更新。`activate` が両方のプラグインをまとめて返す。
+- `media/mermaid.js` / `media/mermaid.css`: プレビュー側のスクリプトとスタイル。
+
+### テスト
+
+- 自動 (`src/test/mermaid.test.ts`): 実物の markdown-it に通した HTML (対象/対象外、エスケープ、属性の引き継ぎ、無効時)、
+  `activate` の戻り値が設定に追従すること、スクリプトと本体のファイルがあること。
+- `media/mermaid.js` は自動テストに乗っていない。

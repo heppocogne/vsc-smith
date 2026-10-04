@@ -33,6 +33,12 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 - タスクリスト (`- [ ]` / `- [x]`) をチェックボックスで表示します。プレビュー上では操作できません。
 - アラート (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) を色付きのブロックで表示します。
 
+#### Mermaid
+
+標準の Markdown プレビューで、`mermaid` のコードブロックを図として表示します。配色は VS Code のテーマ (ライト/ダーク) に合わせます。構文エラーのときは、エラーメッセージと元のソースを表示します。
+
+VS Code 1.121 以降は標準で Mermaid を表示できるので、既定ではそちら (または Markdown Preview Mermaid Support) に譲ります。この機能が表示するのは、それらが無い・無効なときです。
+
 ## 設定
 
 | 設定                                         | 既定値 | 説明                                             |
@@ -45,3 +51,5 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 | `vsc-smith.markdown.enabled`                 | `true` | Markdown のリスト継続・インデントを有効にする    |
 | `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る   |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリストとアラートを表示する     |
+| `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
+| `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |

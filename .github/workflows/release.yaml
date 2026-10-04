@@ -17,6 +17,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - uses: actions/cache@v6
+        with:
+          path: .vscode-test
+          key: vscode-test-${{ runner.os }}-${{ hashFiles('.vscode-test.mjs') }}
       - run: npm ci
       - name: Test
         run: xvfb-run -a npm test

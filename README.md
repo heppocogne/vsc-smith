@@ -26,6 +26,8 @@ VSCode 1.70以降を想定しています。
 VSCode標準のMarkdownサポート+多少の構文補完です。
 Enter で箇条書き・番号付きリスト・タスクリスト・引用を継続し、Tab / Shift+Tab でリスト項目をインデント/アウトデントします。Markdown All in One が有効なときは、既定でそちらに譲ります。
 
+スプレッドシートからコピーしたセル範囲 (タブ区切り) を貼り付けると、既定では Markdown のテーブルとして貼り付けます。貼り付け直後に表示される選択肢 (Ctrl+. で開く) から、そのまま (タブ区切り) の貼り付けに切り替えられます。`vsc-smith.markdown.pasteTable.default` を `text` にすると、最初はそのまま貼り付けます。VS Code 1.87 以降が必要です。
+
 #### GFM
 
 標準の Markdown プレビューに、GitHub Flavored Markdown の表示を足します(一部)。
@@ -49,6 +51,8 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 | `vsc-smith.fileSize.explorerTooltip`         | `true` | エクスプローラーのツールチップにサイズを表示する  |
 | `vsc-smith.copyPath.enabled`                 | `true` | 逆区切り文字の相対パスコピーを有効にする          |
 | `vsc-smith.markdown.enabled`                 | `true` | Markdown のリスト継続・インデントを有効にする     |
+| `vsc-smith.markdown.pasteTable.enabled`      | `true` | タブ区切りテキストをテーブルとして貼り付けられるようにする |
+| `vsc-smith.markdown.pasteTable.default`      | `table` | タブ区切りテキストを最初に貼り付ける形式 (`table` / `text`) |
 | `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る    |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリストとアラートを表示する      |
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ToggleableFeature } from '../../util/feature';
+import { tsvToMarkdownTable } from './pasteTable';
 import { enterEdit, IndentOptions, indentEdit, isInFencedCodeBlock, LineEdit, outdentEdit } from './listEdit';
 
 const SECTION = 'vsc-smith.markdown';
@@ -29,6 +30,9 @@ export function registerMarkdown(context: vscode.ExtensionContext): void {
 	let queue: Promise<unknown> = Promise.resolve();
 	context.subscriptions.push(new ToggleableFeature(SECTION, () => vscode.Disposable.from(
 		new MaioYield(),
+		vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
+			? registerPasteTable()
+			: new vscode.Disposable(() => undefined),
 		...COMMANDS.map(({ id, compute, fallback }) => vscode.commands.registerCommand(id, () => {
 			const run = queue.then(async () => {
 				if (!await applyEdit(compute)) {
@@ -130,4 +134,34 @@ class MaioYield implements vscode.Disposable {
 		this.listener.dispose();
 		void vscode.commands.executeCommand('setContext', YIELD_CONTEXT, false);
 	}
+}
+
+const TABLE_KIND = vscode.DocumentDropOrPasteEditKind.Empty.append('markdown', 'table');
+
+/**
+ * Offers to paste tab-separated text (from a spreadsheet) in a Markdown document as a table. The paste widget
+ * of the editor lets the user switch between the table and the text as copied; `pasteTable.default` chooses
+ * which one is inserted first.
+ */
+function registerPasteTable(): vscode.Disposable {
+	return vscode.languages.registerDocumentPasteEditProvider({ language: 'markdown' }, {
+		async provideDocumentPasteEdits(document, ranges, dataTransfer, _context, token) {
+			const text = await dataTransfer.get('text/plain')?.asString();
+			if (!text || token.isCancellationRequested || isInFencedCodeBlock(i => document.lineAt(i).text, ranges[0].start.line)) {
+				return undefined;
+			}
+			const table = tsvToMarkdownTable(text);
+			if (table === undefined) {
+				return undefined;
+			}
+			const asTable = new vscode.DocumentPasteEdit(table, 'Paste as Markdown Table', TABLE_KIND);
+			const asText = new vscode.DocumentPasteEdit(text, 'Paste as Tab-Separated Text', vscode.DocumentDropOrPasteEditKind.Text);
+			return vscode.workspace.getConfiguration(SECTION).get<string>('pasteTable.default', 'table') === 'text'
+				? [asText, asTable]
+				: [asTable, asText];
+		},
+	}, {
+		providedPasteEditKinds: [TABLE_KIND, vscode.DocumentDropOrPasteEditKind.Text],
+		pasteMimeTypes: ['text/plain'],
+	});
 }

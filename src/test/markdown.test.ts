@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { tsvToMarkdownTable } from '../features/markdown/pasteTable';
 import { enterEdit, IndentOptions, indentEdit, isInFencedCodeBlock, LineEdit, outdentEdit, parseListLine } from '../features/markdown/listEdit';
 import { activateExtension, closeAllEditors, waitFor } from './helpers';
 
@@ -227,5 +228,29 @@ suite('markdown', () => {
 			}
 			await waitFor(registered, 'commands to be registered again');
 		});
+	});
+});
+
+suite('pasteTable', () => {
+	test('converts tab-separated text to a table', () => {
+		assert.strictEqual(tsvToMarkdownTable('a\tb\n1\t2\n'), '| a | b |\n| --- | --- |\n| 1 | 2 |');
+		assert.strictEqual(tsvToMarkdownTable('a\tb\r\n1\t2'), '| a | b |\n| --- | --- |\n| 1 | 2 |');
+	});
+
+	test('pads short rows and keeps empty cells', () => {
+		assert.strictEqual(tsvToMarkdownTable('a\tb\tc\n1\t\t3\n4'), '| a | b | c |\n| --- | --- | --- |\n| 1 |  | 3 |\n| 4 |  |  |');
+	});
+
+	test('handles quoted cells and escapes pipes', () => {
+		assert.strictEqual(
+			tsvToMarkdownTable('a\tb\n"x\ny"\t"say ""hi"""\n1|2\t3'),
+			'| a | b |\n| --- | --- |\n| x<br>y | say "hi" |\n| 1\\|2 | 3 |',
+		);
+	});
+
+	test('leaves text that is not a table', () => {
+		assert.strictEqual(tsvToMarkdownTable('foo'), undefined);
+		assert.strictEqual(tsvToMarkdownTable('a\tb'), undefined);
+		assert.strictEqual(tsvToMarkdownTable('a\nb\nc'), undefined);
 	});
 });

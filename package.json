@@ -99,15 +99,40 @@
             "description": "mermaid: VS Code 標準の Mermaid 表示 (1.121 以降の Mermaid Markdown Features) か Markdown Preview Mermaid Support が有効なときは、そちらに表示を譲る"
           }
         }
+      },
+      {
+        "title": "Copy Button",
+        "properties": {
+          "vsc-smith.copyButton.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "copyButton: Markdown プレビューのコードブロックにコピーボタンを表示する"
+          },
+          "vsc-smith.copyButton.position": {
+            "type": "string",
+            "enum": [
+              "top-right",
+              "bottom-right"
+            ],
+            "enumDescriptions": [
+              "右上",
+              "右下"
+            ],
+            "default": "top-right",
+            "description": "copyButton: コピーボタンの位置"
+          }
+        }
       }
     ],
     "markdown.markdownItPlugins": true,
     "markdown.previewStyles": [
       "./media/gfm.css",
-      "./media/mermaid.css"
+      "./media/mermaid.css",
+      "./media/copyButton.css"
     ],
     "markdown.previewScripts": [
-      "./media/mermaid.js"
+      "./media/mermaid.js",
+      "./media/copyButton.js"
     ],
     "commands": [
       {

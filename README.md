@@ -41,6 +41,10 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 
 VS Code 1.121 以降は標準で Mermaid を表示できるので、既定ではそちら (または Markdown Preview Mermaid Support) に譲ります。
 
+#### Copy Button
+
+標準の Markdown プレビューのコードブロックに、コードをクリップボードへコピーするボタンを表示します。ボタンはコードブロックにマウスを重ねると現れ、位置は左上・右上 (既定)・左下・右下から選べます。
+
 ## 設定
 
 | 設定                                         | 既定値 | 説明                                              |
@@ -55,3 +59,5 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリストとアラートを表示する      |
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
 | `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |
+| `vsc-smith.copyButton.enabled`               | `true` | プレビューのコードブロックにコピーボタンを表示する |
+| `vsc-smith.copyButton.position`              | `top-right` | コピーボタンの位置 (`top-right` / `bottom-right`) |

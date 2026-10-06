@@ -27,7 +27,5 @@ pre[data-vsc-smith-copy]:hover > .vsc-smith-copy-button,
 	background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.5));
 }
 
-pre[data-vsc-smith-copy="top-left"] > .vsc-smith-copy-button { top: 4px; left: 4px; }
 pre[data-vsc-smith-copy="top-right"] > .vsc-smith-copy-button { top: 4px; right: 4px; }
-pre[data-vsc-smith-copy="bottom-left"] > .vsc-smith-copy-button { bottom: 4px; left: 4px; }
 pre[data-vsc-smith-copy="bottom-right"] > .vsc-smith-copy-button { bottom: 4px; right: 4px; }

@@ -1,6 +1,6 @@
 import type MarkdownIt from 'markdown-it';
 
-export const COPY_BUTTON_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
+export const COPY_BUTTON_POSITIONS = ['top-right', 'bottom-right'] as const;
 export type CopyButtonPosition = typeof COPY_BUTTON_POSITIONS[number];
 
 /** Attribute that `media/copyButton.js` looks for; its value is the position of the button. */

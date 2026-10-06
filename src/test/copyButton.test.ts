@@ -2,9 +2,9 @@ import * as assert from 'assert';
 import MarkdownIt from 'markdown-it';
 import { CopyButtonPosition, copyButtonPlugin } from '../features/copyButton/plugin';
 
-function render(source: string, position: CopyButtonPosition | undefined = 'top-right'): string {
+function render(source: string, position: CopyButtonPosition | null = 'top-right'): string {
 	const md = new MarkdownIt();
-	copyButtonPlugin(md, () => position);
+	copyButtonPlugin(md, () => position ?? undefined);
 	return md.render(source);
 }
 
@@ -19,13 +19,13 @@ suite('copyButton plugin', () => {
 	});
 
 	test('disabled', () => {
-		assert.strictEqual(render('```\na\n```\n', undefined), '<pre><code>a\n</code></pre>\n');
+		assert.strictEqual(render('```\na\n```\n', null), '<pre><code>a\n</code></pre>\n');
 	});
 
 	test('only the opening tag of a highlighted block is marked', () => {
 		const md = new MarkdownIt({ highlight: () => '<pre class="hljs"><code><pre>x</pre></code></pre>' });
-		copyButtonPlugin(md, () => 'top-left');
+		copyButtonPlugin(md, () => 'bottom-right');
 		const html = md.render('```js\nx\n```\n');
-		assert.strictEqual(html, '<pre data-vsc-smith-copy="top-left" class="hljs"><code><pre>x</pre></code></pre>');
+		assert.strictEqual(html, '<pre data-vsc-smith-copy="bottom-right" class="hljs"><code><pre>x</pre></code></pre>\n');
 	});
 });

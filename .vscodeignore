@@ -1,7 +1,6 @@
 .vscode/**
 .vscode-test/**
 out/**
-node_modules/**
 src/**
 .gitignore
 .yarnrc
@@ -14,4 +13,8 @@ vsc-extension-quickstart.md
 **/.vscode-test.*
 docs/**
 .github/**
+node_modules/**
 !node_modules/mermaid/dist/mermaid.min.js
+.jj
+.claude
+.serena

@@ -111,15 +111,11 @@
           "vsc-smith.copyButton.position": {
             "type": "string",
             "enum": [
-              "top-left",
               "top-right",
-              "bottom-left",
               "bottom-right"
             ],
             "enumDescriptions": [
-              "左上",
               "右上",
-              "左下",
               "右下"
             ],
             "default": "top-right",
@@ -248,4 +244,4 @@
   "dependencies": {
     "mermaid": "^12.1.0"
   }
-}
+}

@@ -60,4 +60,4 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
 | `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |
 | `vsc-smith.copyButton.enabled`               | `true` | プレビューのコードブロックにコピーボタンを表示する |
-| `vsc-smith.copyButton.position`              | `top-right` | コピーボタンの位置 (`top-left` / `top-right` / `bottom-left` / `bottom-right`) |
+| `vsc-smith.copyButton.position`              | `top-right` | コピーボタンの位置 (`top-right` / `bottom-right`) |

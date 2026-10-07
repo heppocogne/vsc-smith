@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { FileSizeDecorationProvider, FileSizeStatusBar, statFile } from '../features/fileSize';
 import { ToggleableFeature } from '../util/feature';
-import { closeAllEditors, makeTempDir, waitFor } from './helpers';
+import { closeAllEditors, makeTempDir, removeTempDir, waitFor } from './helpers';
 
 suite('fileSize', () => {
 	let dir: string;
@@ -18,7 +18,7 @@ suite('fileSize', () => {
 
 	suiteTeardown(async () => {
 		await closeAllEditors();
-		await fs.rm(dir, { recursive: true, force: true });
+		await removeTempDir(dir);
 	});
 
 	suite('statFile', () => {

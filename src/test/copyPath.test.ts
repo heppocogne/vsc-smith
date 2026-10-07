@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { COMMANDS, convertSeparators, targetUris } from '../features/copyPath';
-import { activateExtension, closeAllEditors, makeTempDir } from './helpers';
+import { activateExtension, closeAllEditors, makeTempDir, removeTempDir } from './helpers';
 
 suite('copyPath', () => {
 	suite('convertSeparators', () => {
@@ -52,7 +52,7 @@ suite('copyPath', () => {
 
 		suiteTeardown(async () => {
 			await closeAllEditors();
-			await fs.rm(dir, { recursive: true, force: true });
+			await removeTempDir(dir);
 		});
 
 		const expected = (sep: '/' | '\\') => convertSeparators(file.fsPath, sep);

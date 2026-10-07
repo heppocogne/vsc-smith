@@ -168,7 +168,7 @@ async function pasteAsTable(): Promise<void> {
  * copied; `pasteTable.default` chooses which one is inserted first. Does nothing before VS Code 1.87.
  */
 function registerPasteWidget(): vscode.Disposable {
-	if (typeof vscode.languages.registerDocumentPasteEditProvider !== 'function') {
+	if (typeof vscode.languages.registerDocumentPasteEditProvider !== 'function' || !vscode.DocumentDropOrPasteEditKind) {
 		return new vscode.Disposable(() => undefined);
 	}
 	const tableKind = vscode.DocumentDropOrPasteEditKind.Empty.append('markdown', 'table');

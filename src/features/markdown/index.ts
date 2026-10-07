@@ -184,9 +184,9 @@ function registerPasteWidget(): vscode.Disposable {
 			}
 			const asTable = new vscode.DocumentPasteEdit(table, 'Paste as Markdown Table', tableKind);
 			const asText = new vscode.DocumentPasteEdit(text, 'Paste as Tab-Separated Text', vscode.DocumentDropOrPasteEditKind.Text);
-			return vscode.workspace.getConfiguration(SECTION).get<string>('pasteTable.default', 'table') === 'text'
-				? [asText, asTable]
-				: [asTable, asText];
+			return vscode.workspace.getConfiguration(SECTION).get<string>('pasteTable.default', 'text') === 'table'
+				? [asTable, asText]
+				: [asText, asTable];
 		},
 	}, {
 		providedPasteEditKinds: [tableKind, vscode.DocumentDropOrPasteEditKind.Text],

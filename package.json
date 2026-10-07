@@ -80,7 +80,7 @@
               "table",
               "text"
             ],
-            "default": "table",
+            "default": "text",
             "description": "markdown: タブ区切りテキストを貼り付けたとき最初に挿入する形式 (table: テーブルの書式, text: そのまま)。貼り付け直後の選択肢 (Ctrl+. など) でもう一方に切り替えられる"
           },
           "vsc-smith.markdown.yieldToMarkdownAllInOne": {

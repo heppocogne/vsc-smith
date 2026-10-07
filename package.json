@@ -3,7 +3,7 @@
   "displayName": "VSCode Smith",
   "description": "雑多な拡張機能集",
   "publisher": "heppocogne",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.70.0"
   },

@@ -81,7 +81,7 @@
           "vsc-smith.gfm.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "gfm: Markdown プレビューでタスクリストのチェックボックスとアラート (> [!NOTE] など) を表示する"
+            "description": "gfm: Markdown プレビューでタスクリストのチェックボックス、アラート (> [!NOTE] など)、脚注 ([^1]) を表示する"
           }
         }
       },

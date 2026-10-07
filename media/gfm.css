@@ -39,3 +39,15 @@
 .markdown-alert > :last-child {
 	margin-bottom: 0;
 }
+
+.footnotes {
+	font-size: 0.9em;
+}
+
+.footnotes-sep {
+	margin-top: 2em;
+}
+
+.footnote-backref {
+	text-decoration: none;
+}

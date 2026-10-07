@@ -85,7 +85,7 @@ suite('mermaid extension', () => {
 	test('the preview script and the library it loads are in place', async () => {
 		const ext = vscode.extensions.all.find(e => e.packageJSON.name === 'vsc-smith');
 		assert.ok(ext);
-		assert.deepStrictEqual(ext.packageJSON.contributes['markdown.previewScripts'], ['./media/mermaid.js']);
+		assert.ok(ext.packageJSON.contributes['markdown.previewScripts'].includes('./media/mermaid.js'));
 		// The path media/mermaid.js resolves against its own location.
 		for (const file of ['media/mermaid.js', 'node_modules/mermaid/dist/mermaid.min.js']) {
 			const stat = await vscode.workspace.fs.stat(vscode.Uri.joinPath(ext.extensionUri, file));

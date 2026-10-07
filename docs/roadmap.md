@@ -47,10 +47,11 @@
 | 5   | GFM サポート (プレビュー・補完)          | `vsc-smith.gfm`      | プレビューを実装・自動テスト済み                |
 | 6   | 区切り文字を指定したパスのコピー         | `vsc-smith.copyPath` | 実装                                            |
 | 7   | Mermaid プレビュー                       | `vsc-smith.mermaid`  | 実装・自動テスト済み                            |
-| 8   | 数式表示 (KaTeX)                         | `vsc-smith.math`     | 計画                                            |
+| 8   | ~~数式表示 (KaTeX)~~                     | —                    | 取り下げ (標準・Markdown All in One で代替)     |
 | 9   | Markdown の表の整形                      | `vsc-smith.table`    | 計画                                            |
 | 10  | Markdown の編集コマンド                  | `vsc-smith.mdEdit`   | 計画                                            |
 | 11  | コピー系の追加                           | `vsc-smith.copyPath` | 計画 (6 の拡張)                                 |
+| 12  | 脚注 (プレビュー・補助)                  | `vsc-smith.footnote` | 計画 (他の脚注拡張に譲る)                       |
 
 ---
 
@@ -180,7 +181,7 @@ Markdown All in One (`yzhang.markdown-all-in-one`, 以下 MAIO) はリスト継�
 ### プレビュー
 
 組み込みのプレビュー (markdown-it) は表・取り消し線に対応済み。タスクリストのチェックボックスとアラートを足す。
-脚注・絵文字ショートコードは対象外 (必要になったら検討)。
+脚注は 12 で扱う。絵文字ショートコードは対象外 (必要になったら検討)。
 
 - タスクリスト: リスト項目の先頭の `[ ]` / `[x]` / `[X]` を無効化したチェックボックスに置き換える。
   記号の後ろに空白と本文が必要。`li` に `task-list-item`、親リストに `contains-task-list` を付ける。
@@ -287,28 +288,14 @@ Mermaid Markdown Features (`vscode.mermaid-markdown-features`) として取り�
   `activate` の戻り値が設定に追従すること、スクリプトと本体のファイルがあること。
 - `media/mermaid.js` は自動テストに乗っていない。
 
-## 8. 数式表示 (`math`) — 計画
+## 8. 数式表示 (取り下げ)
 
-VS Code 標準の数式表示 (`markdown.math.enabled`) は 1.72 には無いので、プレビューに KaTeX で `$...$` / `$$...$$` を表示する。
-標準の数式表示がある新しい VS Code では、それに譲る (7 の Mermaid と同じ考え方)。
+標準で代替できるため取り下げた。
 
-### 方針
-
-- 既存の GFM・Mermaid と同じく、markdown-it プラグイン (拡張ホスト側) + プレビュー側スクリプトの構成にする。
-  `ToggleableFeature` には乗らず、設定を実行のたびに読む。
-- 区切りの判定 (インライン `$...$`、ブロック `$$...$$`) はプラグインで行い、数式のソースを HTML エスケープして
-  専用クラス (`vsc-smith-math`) の要素に出す。他の拡張のクラスは使わず、二重描画を避ける。
-- 描画は `katex` を `dependencies` に入れ、プレビュー側で `katex.render` を呼ぶ (サーバー側で HTML 化する案は要検証)。
-  - 本体と CSS・フォントは `.vscodeignore` で必要なファイルだけ vsix に入れる。
-  - 数式が無いときは本体を読み込まない (Mermaid と同様)。
-- 通貨の `$5 and $10` を数式と誤認しないよう、開き `$` の直後・閉じ `$` の直前が空白でないこと、
-  閉じ `$` の直後が数字でないことを条件にする。コードスパン・コードブロック内は対象外。
-- 要検証: 1.72 のプレビューの CSP で KaTeX のフォント・スタイルを読めるか。
-
-### テスト
-
-- 自動: 実物の markdown-it に通した HTML (インライン・ブロック、通貨との区別、エスケープ、コード内、無効時)。
-- 手動: 数式、ダークテーマ、プレビューの更新、数式エラー時の表示。
+- VS Code 標準のプレビューは、1.58 以降、組み込みの拡張 `vscode.markdown-math` で KaTeX による数式表示を持つ
+  (設定 `markdown.math.enabled`、既定 `true`)。1.72 でも使える。
+- Markdown All in One も数式表示を持つ (設定 `markdown.extension.math.enabled`、既定 `true`)。
+- 両方を無効にしている環境向けの代替になるだけで、KaTeX 本体 (フォント含む) を vsix に入れるコストに見合わない。
 
 ## 9. Markdown の表の整形 (`table`) — 計画
 
@@ -346,3 +333,42 @@ Markdown All in One があるときは、同等のコマンドを持つのでキ
 - Python のモジュールパス: `.py` ファイルのワークスペースからの相対パスを `.` 区切りにする (`pkg/mod.py` → `pkg.mod`)。
   `__init__.py` はパッケージ名にする。`.py` 以外では出さない (`when` で `resourceExtname == .py`)。
 - 相対パスの求め方は 6 と共通化する。変換は純粋関数に切り出してユニットテストする。
+
+## 12. 脚注 (`footnote`) — 計画
+
+VS Code 標準のプレビュー (markdown-it) は脚注 `[^1]` に対応していない。Markdown All in One (以下 MAIO) もプレビューの脚注は持たない
+(要確認)。プレビューに脚注を表示し、書くときの補助を足す。
+
+### 他の脚注表示との共存
+
+脚注のプレビュー拡張 (`bierner.markdown-footnotes`、`houkanshan.vscode-markdown-footnote` など) が有効なら譲る。
+7 の Mermaid と同じ方式で、markdown-it のルールが実行のたびに判定し、譲るときは何もしない。
+
+- 設定 `vsc-smith.footnote.yieldToOtherExtensions` (既定 `true`)。`false` なら譲らない。
+- 判定は `vscode.extensions.getExtension` で行い、拡張の増減 (`vscode.extensions.onDidChange`) でプレビューを更新する。
+- 要検証: 譲る対象の拡張 ID が正しいこと、MAIO が脚注を扱うかどうか (扱うなら MAIO にも譲る)。
+
+### プレビュー
+
+- markdown-it プラグイン (拡張ホスト側) で、本文の `[^label]` を上付きのリンクにし、文書末尾に脚注の一覧と戻りリンクを出す。
+  3 の GFM と同じく、`ToggleableFeature` には乗らず、設定を実行のたびに読む。
+- 構文は GitHub に合わせる。定義 `[^label]: 本文` (後続の字下げ行で複数段落)、インライン脚注 `^[本文]` は対象外。
+  ラベルは出現順に番号を振る。未定義のラベルは変換せずそのまま出す。同じ脚注を複数回参照すると、戻りリンクを参照の数だけ出す。
+- 既存の npm パッケージ (`markdown-it-footnote`) は使わず、GFM のプラグインと同様に自前で書く。ランタイム依存を持たない。
+  使う場合は devDependencies ではなく dependencies に入れ、バンドルに含める (その場合は理由をコメントに書く)。
+- エスケープした `\[^1]`、コードスパン・コードブロック内は対象外。
+- スタイルは `media/gfm.css` に足すか `media/footnote.css` を新設し、`markdown.previewStyles` に登録する。
+  追加した要素だけを対象にする。
+
+### 編集の補助 (任意)
+
+- コマンド `vsc-smith.footnote.insert`: カーソル位置に `[^次の番号]` を挿入し、文書末尾に `[^次の番号]: ` を追加してカーソルを移す。
+  次の番号は既存のラベル (数字) の最大値 + 1。ラベルは数字だけを自動採番し、文字のラベルは扱わない。
+  キーバインドは付けず、コマンドパレットから使う。10 の編集コマンドの一部にしてもよい。
+- 定義へのジャンプ・ホバー・未使用/未定義の警告は対象外 (必要になったら検討)。
+
+### テスト
+
+- 自動: 実物の markdown-it に通した HTML (参照・定義の対応、複数参照、未定義、エスケープ、コード内、無効時)、
+  純粋関数 (次の番号の決定、挿入位置)、`activate` の戻り値が設定に追従すること。
+- 手動: プレビューの表示、定義へ/戻りのジャンプ、ダークテーマ、他の脚注拡張を有効にしたとき二重表示にならないこと。

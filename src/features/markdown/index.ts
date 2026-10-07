@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ToggleableFeature } from '../../util/feature';
+import { tsvToMarkdownTable } from './pasteTable';
 import { enterEdit, IndentOptions, indentEdit, isInFencedCodeBlock, LineEdit, outdentEdit } from './listEdit';
 
 const SECTION = 'vsc-smith.markdown';
@@ -29,6 +30,9 @@ export function registerMarkdown(context: vscode.ExtensionContext): void {
 	let queue: Promise<unknown> = Promise.resolve();
 	context.subscriptions.push(new ToggleableFeature(SECTION, () => vscode.Disposable.from(
 		new MaioYield(),
+		vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
+			? registerPasteTable()
+			: new vscode.Disposable(() => undefined),
 		...COMMANDS.map(({ id, compute, fallback }) => vscode.commands.registerCommand(id, () => {
 			const run = queue.then(async () => {
 				if (!await applyEdit(compute)) {
@@ -133,4 +137,59 @@ class MaioYield implements vscode.Disposable {
 		this.listener.dispose();
 		void vscode.commands.executeCommand('setContext', YIELD_CONTEXT, false);
 	}
+}
+
+const PASTE_AS_TABLE = 'vsc-smith.markdown.pasteAsTable';
+
+/**
+ * Pasting tab-separated text (from a spreadsheet) as a table. Both ways are registered: the paste widget exists
+ * from VS Code 1.87 on, and the command works with any version.
+ */
+function registerPasteTable(): vscode.Disposable {
+	return vscode.Disposable.from(
+		vscode.commands.registerCommand(PASTE_AS_TABLE, pasteAsTable),
+		registerPasteWidget(),
+	);
+}
+
+/** Pastes the clipboard as a table, or as it is when it does not hold a table. */
+async function pasteAsTable(): Promise<void> {
+	const editor = vscode.window.activeTextEditor;
+	const table = editor && tsvToMarkdownTable(await vscode.env.clipboard.readText());
+	if (!editor || table === undefined) {
+		await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+		return;
+	}
+	await editor.edit(b => editor.selections.forEach(selection => b.replace(selection, table)));
+}
+
+/**
+ * Offers the table in the paste widget of the editor, which lets the user switch between the table and the text as
+ * copied; `pasteTable.default` chooses which one is inserted first. Does nothing before VS Code 1.87.
+ */
+function registerPasteWidget(): vscode.Disposable {
+	if (typeof vscode.languages.registerDocumentPasteEditProvider !== 'function') {
+		return new vscode.Disposable(() => undefined);
+	}
+	const tableKind = vscode.DocumentDropOrPasteEditKind.Empty.append('markdown', 'table');
+	return vscode.languages.registerDocumentPasteEditProvider({ language: 'markdown' }, {
+		async provideDocumentPasteEdits(document, ranges, dataTransfer, _context, token) {
+			const text = await dataTransfer.get('text/plain')?.asString();
+			if (!text || token.isCancellationRequested || isInFencedCodeBlock(i => document.lineAt(i).text, ranges[0].start.line)) {
+				return undefined;
+			}
+			const table = tsvToMarkdownTable(text);
+			if (table === undefined) {
+				return undefined;
+			}
+			const asTable = new vscode.DocumentPasteEdit(table, 'Paste as Markdown Table', tableKind);
+			const asText = new vscode.DocumentPasteEdit(text, 'Paste as Tab-Separated Text', vscode.DocumentDropOrPasteEditKind.Text);
+			return vscode.workspace.getConfiguration(SECTION).get<string>('pasteTable.default', 'text') === 'table'
+				? [asTable, asText]
+				: [asText, asTable];
+		},
+	}, {
+		providedPasteEditKinds: [tableKind, vscode.DocumentDropOrPasteEditKind.Text],
+		pasteMimeTypes: ['text/plain'],
+	});
 }

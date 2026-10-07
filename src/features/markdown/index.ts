@@ -89,7 +89,10 @@ async function applyEdit(compute: ComputeEdit): Promise<boolean> {
 			continue;
 		}
 		const cursor = new vscode.Position(pos.line + edit.line, edit.character);
-		if (attempt === 0 && doc.version === version + 1 && editor.selection.isEmpty && !editor.selection.active.isEqual(cursor)) {
+		// An insertion at the cursor can leave the inserted text selected, so the selection is reset even when it
+		// is not empty. This only happens while no other edit has been applied in between.
+		if (attempt === 0 && doc.version === version + 1
+			&& !(editor.selection.isEmpty && editor.selection.active.isEqual(cursor))) {
 			editor.selection = new vscode.Selection(cursor, cursor);
 		}
 		editor.revealRange(editor.selection);

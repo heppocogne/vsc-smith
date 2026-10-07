@@ -218,6 +218,13 @@ suite('markdown', () => {
 			});
 		}
 
+		test('does not leave the inserted marker selected', async () => {
+			const editor = await open('- foo|');
+			await vscode.commands.executeCommand('vsc-smith.markdown.onEnter');
+			await waitFor(() => editor.document.getText().includes('\n'), 'the line break');
+			assert.ok(editor.selection.isEmpty, `selection: ${JSON.stringify(editor.selection)}`);
+		});
+
 		test('inserts the line break of the document', async () => {
 			const editor = await open('a\r\n- foo|');
 			await vscode.commands.executeCommand('vsc-smith.markdown.onEnter');

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { MarkdownItExtension, refreshPreview } from '../../util/markdownPreview';
 import { alertPlugin } from './alert';
+import { footnotePlugin } from './footnote';
 import { taskListPlugin } from './taskList';
 
 const SECTION = 'vsc-smith.gfm';
@@ -23,6 +24,7 @@ export function registerGfm(context: vscode.ExtensionContext): MarkdownItExtensi
 		extendMarkdownIt(md) {
 			alertPlugin(md, isEnabled);
 			taskListPlugin(md, isEnabled);
+			footnotePlugin(md, isEnabled);
 			return md;
 		},
 	};

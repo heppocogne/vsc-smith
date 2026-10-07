@@ -23,9 +23,17 @@ export async function activateExtension(): Promise<void> {
 	await ext.activate();
 }
 
-/** Creates a fresh temporary directory; remove it with `fs.rm(dir, { recursive: true })`. */
+/** Creates a fresh temporary directory; remove it with `removeTempDir`. */
 export function makeTempDir(): Promise<string> {
 	return fs.mkdtemp(path.join(os.tmpdir(), 'vsc-smith-test-'));
+}
+
+/**
+ * Removes a directory made by `makeTempDir`. On Windows the file watcher of the test instance can keep a handle on it
+ * for a moment after the test, which makes `rmdir` fail with EBUSY, so busy errors are retried.
+ */
+export function removeTempDir(dir: string): Promise<void> {
+	return fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }
 
 export async function closeAllEditors(): Promise<void> {

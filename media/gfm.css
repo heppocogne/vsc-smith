@@ -39,3 +39,57 @@
 .markdown-alert > :last-child {
 	margin-bottom: 0;
 }
+
+.footnotes {
+	font-size: 0.9em;
+}
+
+.footnotes-sep {
+	margin-top: 2em;
+}
+
+.footnote-backref {
+	text-decoration: none;
+}
+
+/* Icons: Material Icons (outlined) by Google, Apache License 2.0. See NOTICE.md. */
+.markdown-alert > .markdown-alert-title::before {
+	content: "";
+	display: inline-block;
+	width: 1.2em;
+	height: 1.2em;
+	margin-right: 0.5em;
+	vertical-align: -0.2em;
+	background-color: currentColor;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: contain;
+}
+
+.markdown-alert.markdown-alert-note > .markdown-alert-title::before {
+	mask-image: url("icons/alert-note.svg");
+	-webkit-mask-image: url("icons/alert-note.svg");
+}
+
+.markdown-alert.markdown-alert-tip > .markdown-alert-title::before {
+	mask-image: url("icons/alert-tip.svg");
+	-webkit-mask-image: url("icons/alert-tip.svg");
+}
+
+.markdown-alert.markdown-alert-important > .markdown-alert-title::before {
+	mask-image: url("icons/alert-important.svg");
+	-webkit-mask-image: url("icons/alert-important.svg");
+}
+
+.markdown-alert.markdown-alert-warning > .markdown-alert-title::before {
+	mask-image: url("icons/alert-warning.svg");
+	-webkit-mask-image: url("icons/alert-warning.svg");
+}
+
+.markdown-alert.markdown-alert-caution > .markdown-alert-title::before {
+	mask-image: url("icons/alert-caution.svg");
+	-webkit-mask-image: url("icons/alert-caution.svg");
+}

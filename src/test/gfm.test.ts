@@ -2,12 +2,14 @@ import * as assert from 'assert';
 import MarkdownIt from 'markdown-it';
 import * as vscode from 'vscode';
 import { alertPlugin } from '../features/gfm/alert';
+import { footnotePlugin } from '../features/gfm/footnote';
 import { taskListPlugin } from '../features/gfm/taskList';
 
 function render(source: string, enabled = true): string {
 	const md = new MarkdownIt();
 	alertPlugin(md, () => enabled);
 	taskListPlugin(md, () => enabled);
+	footnotePlugin(md, () => enabled);
 	return md.render(source);
 }
 
@@ -153,5 +155,38 @@ suite('gfm extension', () => {
 		} finally {
 			await config.update('enabled', undefined, vscode.ConfigurationTarget.Global);
 		}
+	});
+});
+
+suite('gfm footnote', () => {
+	test('reference and definition', () => {
+		const html = render('a[^1]\n\n[^1]: note\n');
+		assert.ok(html.includes('<p>a<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>'));
+		assert.ok(html.includes('<li id="fn-1" class="footnote-item"><p>note <a href="#fnref-1" class="footnote-backref">\u21a9\uFE0E</a></p>\n</li>'));
+	});
+
+	test('numbered by first reference, repeated references get back links', () => {
+		const html = render('a[^b] c[^a] d[^b]\n\n[^a]: A\n[^b]: B\n');
+		assert.ok(html.includes('>1</a></sup> c<sup class="footnote-ref"><a href="#fn-a" id="fnref-a">2</a>'));
+		assert.ok(html.includes('id="fnref-b-2">1</a>'));
+		assert.ok(html.includes('class="footnote-backref">\u21a9\uFE0E<sup>2</sup></a>'));
+	});
+
+	test('multi-paragraph definition', () => {
+		const html = render('a[^1]\n\n[^1]: first\n\n    second\n');
+		assert.ok(html.includes('<p>first</p>\n<p>second <a'));
+	});
+
+	test('undefined reference and unreferenced definition', () => {
+		assert.strictEqual(render('a[^x]\n'), '<p>a[^x]</p>\n');
+		assert.ok(!render('[^x]: unused\n').includes('footnote'));
+	});
+
+	test('inline markup in definition', () => {
+		assert.ok(render('a[^1]\n\n[^1]: **b**\n').includes('<strong>b</strong>'));
+	});
+
+	test('disabled', () => {
+		assert.ok(!render('a[^1]\n\n[^1]: note\n', false).includes('footnote'));
 	});
 });

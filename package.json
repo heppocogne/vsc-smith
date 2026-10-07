@@ -5,7 +5,7 @@
   "publisher": "heppocogne",
   "version": "0.0.2",
   "engines": {
-    "vscode": "^1.87.0"
+    "vscode": "^1.70.0"
   },
   "categories": [
     "Other"
@@ -16,7 +16,8 @@
     "onCommand:vsc-smith.copyRelativePath.backslash",
     "onCommand:vsc-smith.markdown.onEnter",
     "onCommand:vsc-smith.markdown.onTab",
-    "onCommand:vsc-smith.markdown.onShiftTab"
+    "onCommand:vsc-smith.markdown.onShiftTab",
+    "onCommand:vsc-smith.markdown.pasteAsTable"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -71,7 +72,7 @@
           "vsc-smith.markdown.pasteTable.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "markdown: スプレッドシートからコピーしたタブ区切りテキストを貼り付けたとき、Markdown のテーブルとして貼り付けるか、そのまま (タブ区切り) 貼り付けるかを、貼り付け後に表示される選択肢から切り替えられるようにする"
+            "description": "markdown: スプレッドシートからコピーしたタブ区切りテキストを貼り付けたとき、Markdown のテーブルとして貼り付けるか、そのまま (タブ区切り) 貼り付けるかを、貼り付け後に表示される選択肢 (VS Code 1.87 以降) から切り替えられるようにする。それ以前の VS Code では「Paste as Markdown Table」コマンドでテーブルとして貼り付ける"
           },
           "vsc-smith.markdown.pasteTable.default": {
             "type": "string",
@@ -133,10 +134,19 @@
         "command": "vsc-smith.copyRelativePath.backslash",
         "title": "Copy Relative Path (\\)",
         "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.markdown.pasteAsTable",
+        "title": "Paste as Markdown Table",
+        "category": "VSCodeSmith"
       }
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "vsc-smith.markdown.pasteAsTable",
+          "when": "config.vsc-smith.markdown.enabled && config.vsc-smith.markdown.pasteTable.enabled && editorLangId == markdown && !editorReadonly"
+        },
         {
           "command": "vsc-smith.copyRelativePath.slash",
           "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))"
@@ -211,7 +221,7 @@
     "@types/markdown-it": "^14.2.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
-    "@types/vscode": "^1.87.0",
+    "@types/vscode": "^1.70.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.0.0",
     "esbuild": "^0.28.1",

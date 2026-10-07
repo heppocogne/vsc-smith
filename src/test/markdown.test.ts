@@ -189,6 +189,20 @@ suite('markdown', () => {
 			return (text.slice(0, offset) + '|' + text.slice(offset)).replace(/\r\n/g, '\n');
 		}
 
+		test('pasteAsTable pastes spreadsheet text as a table', async () => {
+			const editor = await open('|');
+			await vscode.env.clipboard.writeText('a\tb\n1\t2');
+			await vscode.commands.executeCommand('vsc-smith.markdown.pasteAsTable');
+			assert.strictEqual(editor.document.getText().replace(/\r\n/g, '\n'), '| a | b |\n| --- | --- |\n| 1 | 2 |');
+		});
+
+		test('pasteAsTable pastes other text as it is', async () => {
+			const editor = await open('x|');
+			await vscode.env.clipboard.writeText('foo');
+			await vscode.commands.executeCommand('vsc-smith.markdown.pasteAsTable');
+			assert.strictEqual(editor.document.getText(), 'xfoo');
+		});
+
 		const cases: [string, string, string][] = [
 			['vsc-smith.markdown.onEnter', 'a\n- foo|', 'a\n- foo\n- |'],
 			['vsc-smith.markdown.onEnter', 'foo|', 'foo\n|'],

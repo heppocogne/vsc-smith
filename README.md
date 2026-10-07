@@ -36,6 +36,7 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 - アラート (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) を色付きのブロックで表示します。  
 アイコンは[Material Icons](https://fonts.google.com/icons)からお借りしました。
 アイコンのライセンスは[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)です。
+- 脚注 (`[^1]` と `[^1]: 本文`) を、文書末尾の脚注一覧と戻りリンク付きで表示します。
 
 #### Mermaid
 
@@ -58,7 +59,7 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 | `vsc-smith.copyPath.enabled`                 | `true` | 逆区切り文字の相対パスコピーを有効にする          |
 | `vsc-smith.markdown.enabled`                 | `true` | Markdown のリスト継続・インデントを有効にする     |
 | `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る    |
-| `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリストとアラートを表示する      |
+| `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリスト・アラート・脚注を表示する      |
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
 | `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |
 | `vsc-smith.copyButton.enabled`               | `true` | プレビューのコードブロックにコピーボタンを表示する |

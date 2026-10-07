@@ -40,6 +40,18 @@
 	margin-bottom: 0;
 }
 
+.footnotes {
+	font-size: 0.9em;
+}
+
+.footnotes-sep {
+	margin-top: 2em;
+}
+
+.footnote-backref {
+	text-decoration: none;
+}
+
 /* Icons: Material Icons (outlined) by Google, Apache License 2.0. See NOTICE.md. */
 .markdown-alert > .markdown-alert-title::before {
 	content: "";

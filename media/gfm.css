@@ -40,26 +40,6 @@
 	margin-bottom: 0;
 }
 
-.vscode-body blockquote.markdown-alert {
-	--alert-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z%22/%3E%3C/svg%3E");
-}
-
-.vscode-body blockquote.markdown-alert-tip {
-	--alert-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z%22/%3E%3C/svg%3E");
-}
-
-.vscode-body blockquote.markdown-alert-important {
-	--alert-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17l-.59.59-.58.58V4h16v12zm-9-4h2v2h-2zm0-6h2v4h-2z%22/%3E%3C/svg%3E");
-}
-
-.vscode-body blockquote.markdown-alert-warning {
-	--alert-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z%22/%3E%3C/svg%3E");
-}
-
-.vscode-body blockquote.markdown-alert-caution {
-	--alert-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM19 14.9 14.9 19H9.1L5 14.9V9.1L9.1 5h5.8L19 9.1v5.8zm-4.17-7.14L12 10.59 9.17 7.76 7.76 9.17 10.59 12l-2.83 2.83 1.41 1.41L12 13.41l2.83 2.83 1.41-1.41L13.41 12l2.83-2.83-1.41-1.41z%22/%3E%3C/svg%3E");
-}
-
 /* Icons: Material Icons (outlined) by Google, Apache License 2.0. See NOTICE.md. */
 .markdown-alert > .markdown-alert-title::before {
 	content: "";
@@ -69,6 +49,35 @@
 	margin-right: 0.5em;
 	vertical-align: -0.2em;
 	background-color: currentColor;
-	-webkit-mask: var(--alert-icon) center / contain no-repeat;
-	mask: var(--alert-icon) center / contain no-repeat;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: contain;
+}
+
+.markdown-alert.markdown-alert-note > .markdown-alert-title::before {
+	mask-image: url("icons/alert-note.svg");
+	-webkit-mask-image: url("icons/alert-note.svg");
+}
+
+.markdown-alert.markdown-alert-tip > .markdown-alert-title::before {
+	mask-image: url("icons/alert-tip.svg");
+	-webkit-mask-image: url("icons/alert-tip.svg");
+}
+
+.markdown-alert.markdown-alert-important > .markdown-alert-title::before {
+	mask-image: url("icons/alert-important.svg");
+	-webkit-mask-image: url("icons/alert-important.svg");
+}
+
+.markdown-alert.markdown-alert-warning > .markdown-alert-title::before {
+	mask-image: url("icons/alert-warning.svg");
+	-webkit-mask-image: url("icons/alert-warning.svg");
+}
+
+.markdown-alert.markdown-alert-caution > .markdown-alert-title::before {
+	mask-image: url("icons/alert-caution.svg");
+	-webkit-mask-image: url("icons/alert-caution.svg");
 }

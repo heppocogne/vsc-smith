@@ -33,7 +33,9 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 標準の Markdown プレビューに、GitHub Flavored Markdown の表示を足します(一部)。
 
 - タスクリスト (`- [ ]` / `- [x]`) をチェックボックスで表示します。プレビュー上では操作できません。
-- アラート (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) を色付きのブロックで表示します。
+- アラート (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`) を色付きのブロックで表示します。  
+アイコンは[Material Icons](https://fonts.google.com/icons)からお借りしました。
+アイコンのライセンスは[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)です。
 - 脚注 (`[^1]` と `[^1]: 本文`) を、文書末尾の脚注一覧と戻りリンク付きで表示します。
 
 #### Mermaid

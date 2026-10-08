@@ -1,7 +1,15 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { tsvToMarkdownTable } from '../features/markdown/pasteTable';
-import { enterEdit, IndentOptions, indentEdit, isInFencedCodeBlock, LineEdit, outdentEdit, parseListLine } from '../features/markdown/listEdit';
+import {
+	enterEdit,
+	IndentOptions,
+	indentEdit,
+	isInFencedCodeBlock,
+	LineEdit,
+	outdentEdit,
+	parseListLine,
+} from '../features/markdown/listEdit';
 import { activateExtension, closeAllEditors, waitFor } from './helpers';
 
 const SPACES: IndentOptions = { insertSpaces: true, tabSize: 2 };
@@ -10,7 +18,11 @@ const TABS: IndentOptions = { insertSpaces: false, tabSize: 4 };
 /** Builds the expected edit from a string where `|` marks the cursor. */
 function expected(textWithCursor: string): LineEdit {
 	const before = textWithCursor.slice(0, textWithCursor.indexOf('|')).split('\n');
-	return { text: textWithCursor.replace('|', ''), line: before.length - 1, character: before[before.length - 1].length };
+	return {
+		text: textWithCursor.replace('|', ''),
+		line: before.length - 1,
+		character: before[before.length - 1].length,
+	};
 }
 
 /** Runs `fn` on a line where `|` marks the cursor. */
@@ -22,16 +34,31 @@ suite('markdown', () => {
 	suite('parseListLine', () => {
 		test('splits a list item into its parts', () => {
 			assert.deepStrictEqual(parseListLine('> \t- [x] foo'), {
-				quote: '> ', indent: '\t', marker: '-', space: ' ', task: '[x] ', body: 'foo',
+				quote: '> ',
+				indent: '\t',
+				marker: '-',
+				space: ' ',
+				task: '[x] ',
+				body: 'foo',
 			});
 			assert.deepStrictEqual(parseListLine('12) foo'), {
-				quote: '', indent: '', marker: '12)', space: ' ', task: '', body: 'foo',
+				quote: '',
+				indent: '',
+				marker: '12)',
+				space: ' ',
+				task: '',
+				body: 'foo',
 			});
 		});
 
 		test('blockquote without a list marker', () => {
 			assert.deepStrictEqual(parseListLine('> >   foo'), {
-				quote: '> > ', indent: '', marker: '', space: '', task: '', body: '  foo',
+				quote: '> > ',
+				indent: '',
+				marker: '',
+				space: '',
+				task: '',
+				body: '  foo',
 			});
 		});
 
@@ -148,12 +175,18 @@ suite('markdown', () => {
 
 		test('detects lines between fences', () => {
 			const text = ['- a', '```js', '- b', '```', '- c'].join('\n');
-			assert.deepStrictEqual([0, 2, 4].map(l => check(text, l)), [false, true, false]);
+			assert.deepStrictEqual(
+				[0, 2, 4].map(l => check(text, l)),
+				[false, true, false],
+			);
 		});
 
 		test('closes only with the same character and at least the same length', () => {
 			const text = ['````', '```', '~~~', '- a', '````', '- b'].join('\n');
-			assert.deepStrictEqual([3, 5].map(l => check(text, l)), [true, false]);
+			assert.deepStrictEqual(
+				[3, 5].map(l => check(text, l)),
+				[true, false],
+			);
 		});
 
 		test('handles tilde fences, fences in lists and in blockquotes', () => {
@@ -174,7 +207,10 @@ suite('markdown', () => {
 		/** Opens a markdown document where `|` marks the cursor. */
 		async function open(textWithCursor: string): Promise<vscode.TextEditor> {
 			const offset = textWithCursor.indexOf('|');
-			const doc = await vscode.workspace.openTextDocument({ language: 'markdown', content: textWithCursor.replace('|', '') });
+			const doc = await vscode.workspace.openTextDocument({
+				language: 'markdown',
+				content: textWithCursor.replace('|', ''),
+			});
 			const editor = await vscode.window.showTextDocument(doc);
 			editor.options = { insertSpaces: true, tabSize: 2 };
 			const pos = doc.positionAt(offset);
@@ -214,7 +250,10 @@ suite('markdown', () => {
 			test(`${id}: ${JSON.stringify(before)}`, async () => {
 				const editor = await open(before);
 				await vscode.commands.executeCommand(id);
-				await waitFor(() => textWithCursor(editor) === after, `${JSON.stringify(after)}, got ${JSON.stringify(textWithCursor(editor))}`);
+				await waitFor(
+					() => textWithCursor(editor) === after,
+					`${JSON.stringify(after)}, got ${JSON.stringify(textWithCursor(editor))}`,
+				);
 			});
 		}
 
@@ -243,7 +282,7 @@ suite('markdown', () => {
 			const registered = async () => (await vscode.commands.getCommands(true)).includes('vsc-smith.markdown.onEnter');
 			try {
 				await config.update('enabled', false, vscode.ConfigurationTarget.Global);
-				await waitFor(async () => !await registered(), 'commands to be unregistered');
+				await waitFor(async () => !(await registered()), 'commands to be unregistered');
 			} finally {
 				await config.update('enabled', undefined, vscode.ConfigurationTarget.Global);
 			}
@@ -259,7 +298,10 @@ suite('pasteTable', () => {
 	});
 
 	test('pads short rows and keeps empty cells', () => {
-		assert.strictEqual(tsvToMarkdownTable('a\tb\tc\n1\t\t3\n4'), '| a | b | c |\n| --- | --- | --- |\n| 1 |  | 3 |\n| 4 |  |  |');
+		assert.strictEqual(
+			tsvToMarkdownTable('a\tb\tc\n1\t\t3\n4'),
+			'| a | b | c |\n| --- | --- | --- |\n| 1 |  | 3 |\n| 4 |  |  |',
+		);
 	});
 
 	test('handles quoted cells and escapes pipes', () => {

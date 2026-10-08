@@ -17,4 +17,4 @@ export function activate(context: vscode.ExtensionContext): MarkdownItExtension 
 	};
 }
 
-export function deactivate() { }
+export function deactivate() {}

@@ -50,12 +50,18 @@ export const COMMANDS: { id: string; sep: Separator }[] = [
 // Which of the two commands is shown depends on `explorer.copyRelativePathSeparator` and is decided by the `when`
 // clauses in package.json, which also hide both while the feature is disabled.
 export function registerCopyPath(context: vscode.ExtensionContext): void {
-	context.subscriptions.push(new ToggleableFeature(SECTION, () => vscode.Disposable.from(
-		...COMMANDS.map(({ id, sep }) => vscode.commands.registerCommand(id, async (uri?: unknown, uris?: unknown) => {
-			const text = relativePathsText(targetUris(uri, uris), sep);
-			if (text !== undefined) {
-				await vscode.env.clipboard.writeText(text);
-			}
-		})),
-	)));
+	context.subscriptions.push(
+		new ToggleableFeature(SECTION, () =>
+			vscode.Disposable.from(
+				...COMMANDS.map(({ id, sep }) =>
+					vscode.commands.registerCommand(id, async (uri?: unknown, uris?: unknown) => {
+						const text = relativePathsText(targetUris(uri, uris), sep);
+						if (text !== undefined) {
+							await vscode.env.clipboard.writeText(text);
+						}
+					}),
+				),
+			),
+		),
+	);
 }

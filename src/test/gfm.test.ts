@@ -18,14 +18,17 @@ const CHECKED = '<input class="task-list-item-checkbox" type="checkbox" disabled
 
 suite('gfm task list', () => {
 	test('unchecked and checked items', () => {
-		assert.strictEqual(render('- [ ] a\n- [x] b\n- [X] c\n'), [
-			'<ul class="contains-task-list">',
-			`<li class="task-list-item">${UNCHECKED}a</li>`,
-			`<li class="task-list-item">${CHECKED}b</li>`,
-			`<li class="task-list-item">${CHECKED}c</li>`,
-			'</ul>',
-			'',
-		].join('\n'));
+		assert.strictEqual(
+			render('- [ ] a\n- [x] b\n- [X] c\n'),
+			[
+				'<ul class="contains-task-list">',
+				`<li class="task-list-item">${UNCHECKED}a</li>`,
+				`<li class="task-list-item">${CHECKED}b</li>`,
+				`<li class="task-list-item">${CHECKED}c</li>`,
+				'</ul>',
+				'',
+			].join('\n'),
+		);
 	});
 
 	test('ordered and nested lists', () => {
@@ -46,7 +49,15 @@ suite('gfm task list', () => {
 	});
 
 	test('not a task item', () => {
-		for (const source of ['- [ ]\n', '- [ ]a\n', '- [y] a\n', '- \\[ ] a\n', '- [ ](url) a\n', '[ ] a\n', '- a [ ] b\n']) {
+		for (const source of [
+			'- [ ]\n',
+			'- [ ]a\n',
+			'- [y] a\n',
+			'- \\[ ] a\n',
+			'- [ ](url) a\n',
+			'[ ] a\n',
+			'- a [ ] b\n',
+		]) {
 			assert.ok(!render(source).includes('<input'), source);
 		}
 	});
@@ -65,13 +76,16 @@ suite('gfm alert', () => {
 			['WARNING', 'warning', 'Warning'],
 			['CAUTION', 'caution', 'Caution'],
 		]) {
-			assert.strictEqual(render(`> [!${marker}]\n> body\n`), [
-				`<blockquote class="markdown-alert markdown-alert-${type}">`,
-				`<p class="markdown-alert-title">${title}</p>`,
-				'<p>body</p>',
-				'</blockquote>',
-				'',
-			].join('\n'));
+			assert.strictEqual(
+				render(`> [!${marker}]\n> body\n`),
+				[
+					`<blockquote class="markdown-alert markdown-alert-${type}">`,
+					`<p class="markdown-alert-title">${title}</p>`,
+					'<p>body</p>',
+					'</blockquote>',
+					'',
+				].join('\n'),
+			);
 		}
 	});
 
@@ -81,13 +95,16 @@ suite('gfm alert', () => {
 	});
 
 	test('body in a separate paragraph', () => {
-		assert.strictEqual(render('> [!TIP]\n>\n> body\n'), [
-			'<blockquote class="markdown-alert markdown-alert-tip">',
-			'<p class="markdown-alert-title">Tip</p>',
-			'<p>body</p>',
-			'</blockquote>',
-			'',
-		].join('\n'));
+		assert.strictEqual(
+			render('> [!TIP]\n>\n> body\n'),
+			[
+				'<blockquote class="markdown-alert markdown-alert-tip">',
+				'<p class="markdown-alert-title">Tip</p>',
+				'<p>body</p>',
+				'</blockquote>',
+				'',
+			].join('\n'),
+		);
 	});
 
 	test('body keeps inline markup and later lines', () => {
@@ -109,7 +126,12 @@ suite('gfm alert', () => {
 			'1. item\n   - nested\n\n     > [!NOTE]\n     > body\n',
 		]) {
 			const html = render(source);
-			assert.ok(html.includes('<blockquote class="markdown-alert markdown-alert-note">\n<p class="markdown-alert-title">Note</p>\n<p>body</p>'), source);
+			assert.ok(
+				html.includes(
+					'<blockquote class="markdown-alert markdown-alert-note">\n<p class="markdown-alert-title">Note</p>\n<p>body</p>',
+				),
+				source,
+			);
 		}
 	});
 
@@ -162,7 +184,11 @@ suite('gfm footnote', () => {
 	test('reference and definition', () => {
 		const html = render('a[^1]\n\n[^1]: note\n');
 		assert.ok(html.includes('<p>a<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>'));
-		assert.ok(html.includes('<li id="fn-1" class="footnote-item"><p>note <a href="#fnref-1" class="footnote-backref">\u21a9\uFE0E</a></p>\n</li>'));
+		assert.ok(
+			html.includes(
+				'<li id="fn-1" class="footnote-item"><p>note <a href="#fnref-1" class="footnote-backref">\u21a9\uFE0E</a></p>\n</li>',
+			),
+		);
 	});
 
 	test('numbered by first reference, repeated references get back links', () => {

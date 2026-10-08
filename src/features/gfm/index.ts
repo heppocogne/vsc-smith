@@ -15,11 +15,13 @@ function isEnabled(): boolean {
  * afterwards, so each rule reads the setting every time it runs instead.
  */
 export function registerGfm(context: vscode.ExtensionContext): MarkdownItExtension {
-	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-		if (e.affectsConfiguration(SECTION)) {
-			refreshPreview();
-		}
-	}));
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (e.affectsConfiguration(SECTION)) {
+				refreshPreview();
+			}
+		}),
+	);
 	return {
 		extendMarkdownIt(md) {
 			alertPlugin(md, isEnabled);

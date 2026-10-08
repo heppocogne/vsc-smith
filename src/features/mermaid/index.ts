@@ -12,7 +12,10 @@ function isEnabled(): boolean {
 		return false;
 	}
 	// `getExtension` does not return disabled extensions.
-	return !config.get<boolean>('yieldToOtherExtensions', true) || !OTHER_EXTENSIONS.some(id => vscode.extensions.getExtension(id));
+	return (
+		!config.get<boolean>('yieldToOtherExtensions', true) ||
+		!OTHER_EXTENSIONS.some(id => vscode.extensions.getExtension(id))
+	);
 }
 
 /**

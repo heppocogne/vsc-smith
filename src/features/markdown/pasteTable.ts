@@ -60,7 +60,11 @@ export function parseTsv(text: string): string[][] | undefined {
 }
 
 function escapeCell(cell: string): string {
-	return cell.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r\n|\r|\n/g, '<br>').trim();
+	return cell
+		.replace(/\\/g, '\\\\')
+		.replace(/\|/g, '\\|')
+		.replace(/\r\n|\r|\n/g, '<br>')
+		.trim();
 }
 
 /** Converts rows (the first one being the header) to a GFM table, without a trailing line break. */

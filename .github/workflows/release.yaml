@@ -9,7 +9,11 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+
   release:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -17,13 +21,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - uses: actions/cache@v6
-        with:
-          path: .vscode-test
-          key: vscode-test-${{ runner.os }}-${{ hashFiles('.vscode-test.mjs') }}
       - run: npm ci
-      - name: Test
-        run: xvfb-run -a npm test
       - name: Package VSIX
         run: npx --yes @vscode/vsce package -o vsc-smith_${{ github.ref_name }}.vsix
       - name: Create GitHub Release

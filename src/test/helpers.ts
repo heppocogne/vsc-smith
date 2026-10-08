@@ -4,7 +4,11 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 /** Polls `condition` until it returns true or `timeoutMs` elapses. */
-export async function waitFor(condition: () => boolean | Promise<boolean>, message: string, timeoutMs = 5000): Promise<void> {
+export async function waitFor(
+	condition: () => boolean | Promise<boolean>,
+	message: string,
+	timeoutMs = 5000,
+): Promise<void> {
 	const deadline = Date.now() + timeoutMs;
 	while (Date.now() < deadline) {
 		if (await condition()) {

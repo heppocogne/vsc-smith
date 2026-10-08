@@ -6,20 +6,23 @@ import { formatExactBytes, formatFileSize } from '../util/format';
 const SECTION = 'vsc-smith.fileSize';
 
 export function registerFileSize(context: vscode.ExtensionContext): void {
-	context.subscriptions.push(new ToggleableFeature(SECTION, () => {
-		const config = vscode.workspace.getConfiguration(SECTION);
-		const parts: vscode.Disposable[] = [];
-		if (config.get<boolean>('statusBar', true)) {
-			const alignment = config.get<string>('statusBarAlignment', 'left') === 'left'
-				? vscode.StatusBarAlignment.Left
-				: vscode.StatusBarAlignment.Right;
-			parts.push(new FileSizeStatusBar(alignment));
-		}
-		if (config.get<boolean>('explorerTooltip', true)) {
-			parts.push(new FileSizeDecorationProvider());
-		}
-		return vscode.Disposable.from(...parts);
-	}));
+	context.subscriptions.push(
+		new ToggleableFeature(SECTION, () => {
+			const config = vscode.workspace.getConfiguration(SECTION);
+			const parts: vscode.Disposable[] = [];
+			if (config.get<boolean>('statusBar', true)) {
+				const alignment =
+					config.get<string>('statusBarAlignment', 'left') === 'left'
+						? vscode.StatusBarAlignment.Left
+						: vscode.StatusBarAlignment.Right;
+				parts.push(new FileSizeStatusBar(alignment));
+			}
+			if (config.get<boolean>('explorerTooltip', true)) {
+				parts.push(new FileSizeDecorationProvider());
+			}
+			return vscode.Disposable.from(...parts);
+		}),
+	);
 }
 
 /** Returns true when a file system provider is registered for the uri's scheme (excludes untitled:, output:, etc.). */

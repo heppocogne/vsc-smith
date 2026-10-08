@@ -19,11 +19,13 @@ function position(): CopyButtonPosition | undefined {
  * nothing to do.
  */
 export function registerCopyButton(context: vscode.ExtensionContext): MarkdownItExtension {
-	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-		if (e.affectsConfiguration(SECTION)) {
-			refreshPreview();
-		}
-	}));
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (e.affectsConfiguration(SECTION)) {
+				refreshPreview();
+			}
+		}),
+	);
 	return {
 		extendMarkdownIt(md) {
 			copyButtonPlugin(md, position);

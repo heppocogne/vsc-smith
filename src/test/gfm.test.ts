@@ -195,6 +195,7 @@ suite('gfm footnote', () => {
 		const html = render('a[^b] c[^a] d[^b]\n\n[^a]: A\n[^b]: B\n');
 		assert.ok(html.includes('>1</a></sup> c<sup class="footnote-ref"><a href="#fn-a" id="fnref-a">2</a>'));
 		assert.ok(html.includes('id="fnref-b-2">1</a>'));
+		assert.ok(html.includes('class="footnote-backref">\u21a9\uFE0E<sup>1</sup></a>'));
 		assert.ok(html.includes('class="footnote-backref">\u21a9\uFE0E<sup>2</sup></a>'));
 	});
 

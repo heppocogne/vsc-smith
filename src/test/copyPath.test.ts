@@ -3,7 +3,7 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { COMMANDS, convertSeparators, targetUris } from '../features/copyPath';
+import { COMMANDS, CONVERT_COMMANDS, convertSelectedSeparators, convertSeparators, targetUris } from '../features/copyPath';
 import { activateExtension, closeAllEditors, makeTempDir, removeTempDir } from './helpers';
 
 suite('copyPath', () => {
@@ -21,6 +21,17 @@ suite('copyPath', () => {
 			assert.strictEqual(convertSeparators('/work/src/a.ts', '\\', 'linux'), '\\work\\src\\a.ts');
 			assert.strictEqual(convertSeparators('src/a.ts', '\\', 'darwin'), 'src\\a.ts');
 			assert.strictEqual(convertSeparators('C:\\work/a.ts', '\\', 'win32'), 'C:\\work\\a.ts');
+		});
+	});
+
+	suite('convertSelectedSeparators', () => {
+		test('rewrites both kinds of separators on every platform', () => {
+			assert.strictEqual(convertSelectedSeparators('C:\\work/src\\a.ts', '/'), 'C:/work/src/a.ts');
+			assert.strictEqual(convertSelectedSeparators('C:\\work/src\\a.ts', '\\'), 'C:\\work\\src\\a.ts');
+		});
+
+		test('leaves text without separators alone', () => {
+			assert.strictEqual(convertSelectedSeparators('a.ts', '/'), 'a.ts');
 		});
 	});
 
@@ -79,5 +90,20 @@ suite('copyPath', () => {
 				[expected('\\'), convertSeparators(other.fsPath, '\\')].join(os.EOL),
 			);
 		});
+	});
+
+	suite('convert commands', () => {
+		suiteSetup(activateExtension);
+		teardown(closeAllEditors);
+
+		for (const { id, sep } of CONVERT_COMMANDS) {
+			test(`${id} rewrites every non-empty selection`, async () => {
+				const doc = await vscode.workspace.openTextDocument({ content: 'a/b\\c keep/this x\\y' });
+				const editor = await vscode.window.showTextDocument(doc);
+				editor.selections = [new vscode.Selection(0, 0, 0, 5), new vscode.Selection(0, 16, 0, 19)];
+				await vscode.commands.executeCommand(id);
+				assert.strictEqual(doc.getText(), `a${sep}b${sep}c keep/this x${sep}y`);
+			});
+		}
 	});
 });

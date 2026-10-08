@@ -30,6 +30,7 @@ export function registerMarkdown(context: vscode.ExtensionContext): void {
 	let queue: Promise<unknown> = Promise.resolve();
 	context.subscriptions.push(new ToggleableFeature(SECTION, () => vscode.Disposable.from(
 		new MaioYield(),
+		vscode.commands.registerCommand(FULL_PREVIEW, openFullPreview),
 		vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
 			? registerPasteTable()
 			: new vscode.Disposable(() => undefined),
@@ -136,6 +137,21 @@ class MaioYield implements vscode.Disposable {
 	dispose(): void {
 		this.listener.dispose();
 		void vscode.commands.executeCommand('setContext', YIELD_CONTEXT, false);
+	}
+}
+
+const FULL_PREVIEW = 'vsc-smith.markdown.openFullPreview';
+
+/**
+ * Opens the built-in preview as a tab of the current group (not beside it, unlike "Open Preview to the Side"),
+ * then maximizes the group and hides the side bar. Running it again on the maximized group restores the layout.
+ */
+async function openFullPreview(): Promise<void> {
+	await vscode.commands.executeCommand('markdown.showPreview');
+	try {
+		await vscode.commands.executeCommand('workbench.action.maximizeEditorHideSidebar');
+	} catch {
+		// Older VS Code without the command: the preview is still shown in the group.
 	}
 }
 

@@ -17,7 +17,8 @@
     "onCommand:vsc-smith.markdown.onEnter",
     "onCommand:vsc-smith.markdown.onTab",
     "onCommand:vsc-smith.markdown.onShiftTab",
-    "onCommand:vsc-smith.markdown.pasteAsTable"
+    "onCommand:vsc-smith.markdown.pasteAsTable",
+    "onCommand:vsc-smith.markdown.openFullPreview"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -164,10 +165,20 @@
         "command": "vsc-smith.markdown.pasteAsTable",
         "title": "Paste as Markdown Table",
         "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.markdown.openFullPreview",
+        "title": "Open Full Preview",
+        "category": "VSCodeSmith",
+        "icon": "$(screen-full)"
       }
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "vsc-smith.markdown.openFullPreview",
+          "when": "config.vsc-smith.markdown.enabled && editorLangId == markdown"
+        },
         {
           "command": "vsc-smith.markdown.pasteAsTable",
           "when": "config.vsc-smith.markdown.enabled && config.vsc-smith.markdown.pasteTable.enabled && editorLangId == markdown && !editorReadonly"
@@ -193,6 +204,13 @@
           "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')",
           "group": "6_copypath",
           "order": 60
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "vsc-smith.markdown.openFullPreview",
+          "when": "config.vsc-smith.markdown.enabled && editorLangId == markdown",
+          "group": "navigation@-99"
         }
       ],
       "editor/title/context": [

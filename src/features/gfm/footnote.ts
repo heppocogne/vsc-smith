@@ -178,7 +178,7 @@ function tailRule(isEnabled: () => boolean) {
 			const anchors: Token[] = [];
 			for (let subId = 0; subId < item.count; subId++) {
 				const anchor = new Token('footnote_anchor', '', 0);
-				anchor.meta = { id, subId, label: item.label };
+				anchor.meta = { id, subId, label: item.label, multiple: item.count > 1 };
 				anchors.push(anchor);
 			}
 			if (body[body.length - 1]?.type === 'paragraph_close') {
@@ -210,8 +210,8 @@ export function footnotePlugin(md: MarkdownIt, isEnabled: () => boolean): void {
 	rules['footnote_open'] = (tokens, i) => `<li id="${escapeHtml(anchorId('fn', tokens[i].meta.label))}" class="footnote-item">`;
 	rules['footnote_close'] = () => '</li>\n';
 	rules['footnote_anchor'] = (tokens, i) => {
-		const { subId, label } = tokens[i].meta as { subId: number; label: string };
-		const sup = subId > 0 ? `<sup>${subId + 1}</sup>` : '';
+		const { subId, label, multiple } = tokens[i].meta as { subId: number; label: string; multiple: boolean };
+		const sup = multiple ? `<sup>${subId + 1}</sup>` : '';
 		return ` <a href="#${anchorId('fnref', label, subId)}" class="footnote-backref">↩︎${sup}</a>`;
 	};
 }

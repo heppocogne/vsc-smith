@@ -3,7 +3,7 @@
   "displayName": "VSCode Smith",
   "description": "雑多な拡張機能集",
   "publisher": "heppocogne",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -17,8 +17,8 @@
     "onCommand:vsc-smith.markdown.onEnter",
     "onCommand:vsc-smith.markdown.onTab",
     "onCommand:vsc-smith.markdown.onShiftTab",
-    "onCommand:vsc-smith.markdown.pasteAsTable",
-    "onCommand:vsc-smith.markdown.openFullPreview"
+    "onCommand:vsc-smith.markdown.pasteAsTable",
+    "onCommand:vsc-smith.markdown.openPreview"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -167,16 +167,19 @@
         "category": "VSCodeSmith"
       },
       {
-        "command": "vsc-smith.markdown.openFullPreview",
-        "title": "Open Full Preview",
+        "command": "vsc-smith.markdown.openPreview",
+        "title": "Open Preview",
         "category": "VSCodeSmith",
-        "icon": "$(screen-full)"
+        "icon": {
+          "light": "media/icons/preview-light.svg",
+          "dark": "media/icons/preview-dark.svg"
+        }
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "vsc-smith.markdown.openFullPreview",
+          "command": "vsc-smith.markdown.openPreview",
           "when": "config.vsc-smith.markdown.enabled && editorLangId == markdown"
         },
         {
@@ -208,7 +211,7 @@
       ],
       "editor/title": [
         {
-          "command": "vsc-smith.markdown.openFullPreview",
+          "command": "vsc-smith.markdown.openPreview",
           "when": "config.vsc-smith.markdown.enabled && editorLangId == markdown",
           "group": "navigation@-99"
         }

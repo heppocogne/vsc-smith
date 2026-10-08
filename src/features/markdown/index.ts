@@ -30,7 +30,7 @@ export function registerMarkdown(context: vscode.ExtensionContext): void {
 	let queue: Promise<unknown> = Promise.resolve();
 	context.subscriptions.push(new ToggleableFeature(SECTION, () => vscode.Disposable.from(
 		new MaioYield(),
-		vscode.commands.registerCommand(FULL_PREVIEW, openFullPreview),
+		vscode.commands.registerCommand(PREVIEW, openPreview),
 		vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
 			? registerPasteTable()
 			: new vscode.Disposable(() => undefined),
@@ -140,13 +140,13 @@ class MaioYield implements vscode.Disposable {
 	}
 }
 
-const FULL_PREVIEW = 'vsc-smith.markdown.openFullPreview';
+const PREVIEW = 'vsc-smith.markdown.openPreview';
 
 /**
  * Opens the built-in preview as a tab of the current group (not beside it, unlike "Open Preview to the Side"),
  * so that it fills the editor area.
  */
-async function openFullPreview(): Promise<void> {
+async function openPreview(): Promise<void> {
 	await vscode.commands.executeCommand('markdown.showPreview');
 }
 

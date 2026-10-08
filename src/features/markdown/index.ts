@@ -21,28 +21,38 @@ export const COMMANDS: { id: string; compute: ComputeEdit; fallback: () => Thena
 		fallback: () => vscode.commands.executeCommand('type', { source: 'keyboard', text: '\n' }),
 	},
 	{ id: 'vsc-smith.markdown.onTab', compute: indentEdit, fallback: () => vscode.commands.executeCommand('tab') },
-	{ id: 'vsc-smith.markdown.onShiftTab', compute: outdentEdit, fallback: () => vscode.commands.executeCommand('outdent') },
+	{
+		id: 'vsc-smith.markdown.onShiftTab',
+		compute: outdentEdit,
+		fallback: () => vscode.commands.executeCommand('outdent'),
+	},
 ];
 
 export function registerMarkdown(context: vscode.ExtensionContext): void {
 	// Keys are handled one at a time: a key pressed while the previous edit is still being applied (e.g. a held
 	// Enter key) would otherwise be computed from the document and cursor of before that edit.
 	let queue: Promise<unknown> = Promise.resolve();
-	context.subscriptions.push(new ToggleableFeature(SECTION, () => vscode.Disposable.from(
-		new MaioYield(),
-		vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
-			? registerPasteTable()
-			: new vscode.Disposable(() => undefined),
-		...COMMANDS.map(({ id, compute, fallback }) => vscode.commands.registerCommand(id, () => {
-			const run = queue.then(async () => {
-				if (!await applyEdit(compute)) {
-					await fallback();
-				}
-			});
-			queue = run.catch(() => undefined);
-			return run;
-		})),
-	)));
+	context.subscriptions.push(
+		new ToggleableFeature(SECTION, () =>
+			vscode.Disposable.from(
+				new MaioYield(),
+				vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
+					? registerPasteTable()
+					: new vscode.Disposable(() => undefined),
+				...COMMANDS.map(({ id, compute, fallback }) =>
+					vscode.commands.registerCommand(id, () => {
+						const run = queue.then(async () => {
+							if (!(await applyEdit(compute))) {
+								await fallback();
+							}
+						});
+						queue = run.catch(() => undefined);
+						return run;
+					}),
+				),
+			),
+		),
+	);
 }
 
 /**
@@ -85,14 +95,17 @@ async function applyEdit(compute: ComputeEdit): Promise<boolean> {
 		const change = changedPart(text, edit.text);
 		const range = new vscode.Range(pos.line, change.start, pos.line, change.end);
 		const version = doc.version;
-		if (!await editor.edit(b => b.replace(range, change.text), { undoStopBefore: true, undoStopAfter: true })) {
+		if (!(await editor.edit(b => b.replace(range, change.text), { undoStopBefore: true, undoStopAfter: true }))) {
 			continue;
 		}
 		const cursor = new vscode.Position(pos.line + edit.line, edit.character);
 		// An insertion at the cursor can leave the inserted text selected, so the selection is reset even when it
 		// is not empty. This only happens while no other edit has been applied in between.
-		if (attempt === 0 && doc.version === version + 1
-			&& !(editor.selection.isEmpty && editor.selection.active.isEqual(cursor))) {
+		if (
+			attempt === 0 &&
+			doc.version === version + 1 &&
+			!(editor.selection.isEmpty && editor.selection.active.isEqual(cursor))
+		) {
 			editor.selection = new vscode.Selection(cursor, cursor);
 		}
 		editor.revealRange(editor.selection);
@@ -128,8 +141,9 @@ class MaioYield implements vscode.Disposable {
 	}
 
 	private update(): void {
-		const enabled = vscode.workspace.getConfiguration(SECTION).get<boolean>('yieldToMarkdownAllInOne', true)
-			&& vscode.extensions.getExtension(MAIO_ID) !== undefined;
+		const enabled =
+			vscode.workspace.getConfiguration(SECTION).get<boolean>('yieldToMarkdownAllInOne', true) &&
+			vscode.extensions.getExtension(MAIO_ID) !== undefined;
 		void vscode.commands.executeCommand('setContext', YIELD_CONTEXT, enabled);
 	}
 
@@ -146,10 +160,7 @@ const PASTE_AS_TABLE = 'vsc-smith.markdown.pasteAsTable';
  * from VS Code 1.87 on, and the command works with any version.
  */
 function registerPasteTable(): vscode.Disposable {
-	return vscode.Disposable.from(
-		vscode.commands.registerCommand(PASTE_AS_TABLE, pasteAsTable),
-		registerPasteWidget(),
-	);
+	return vscode.Disposable.from(vscode.commands.registerCommand(PASTE_AS_TABLE, pasteAsTable), registerPasteWidget());
 }
 
 /** Pastes the clipboard as a table, or as it is when it does not hold a table. */
@@ -172,24 +183,36 @@ function registerPasteWidget(): vscode.Disposable {
 		return new vscode.Disposable(() => undefined);
 	}
 	const tableKind = vscode.DocumentDropOrPasteEditKind.Empty.append('markdown', 'table');
-	return vscode.languages.registerDocumentPasteEditProvider({ language: 'markdown' }, {
-		async provideDocumentPasteEdits(document, ranges, dataTransfer, _context, token) {
-			const text = await dataTransfer.get('text/plain')?.asString();
-			if (!text || token.isCancellationRequested || isInFencedCodeBlock(i => document.lineAt(i).text, ranges[0].start.line)) {
-				return undefined;
-			}
-			const table = tsvToMarkdownTable(text);
-			if (table === undefined) {
-				return undefined;
-			}
-			const asTable = new vscode.DocumentPasteEdit(table, 'Paste as Markdown Table', tableKind);
-			const asText = new vscode.DocumentPasteEdit(text, 'Paste as Tab-Separated Text', vscode.DocumentDropOrPasteEditKind.Text);
-			return vscode.workspace.getConfiguration(SECTION).get<string>('pasteTable.default', 'text') === 'table'
-				? [asTable, asText]
-				: [asText, asTable];
+	return vscode.languages.registerDocumentPasteEditProvider(
+		{ language: 'markdown' },
+		{
+			async provideDocumentPasteEdits(document, ranges, dataTransfer, _context, token) {
+				const text = await dataTransfer.get('text/plain')?.asString();
+				if (
+					!text ||
+					token.isCancellationRequested ||
+					isInFencedCodeBlock(i => document.lineAt(i).text, ranges[0].start.line)
+				) {
+					return undefined;
+				}
+				const table = tsvToMarkdownTable(text);
+				if (table === undefined) {
+					return undefined;
+				}
+				const asTable = new vscode.DocumentPasteEdit(table, 'Paste as Markdown Table', tableKind);
+				const asText = new vscode.DocumentPasteEdit(
+					text,
+					'Paste as Tab-Separated Text',
+					vscode.DocumentDropOrPasteEditKind.Text,
+				);
+				return vscode.workspace.getConfiguration(SECTION).get<string>('pasteTable.default', 'text') === 'table'
+					? [asTable, asText]
+					: [asText, asTable];
+			},
 		},
-	}, {
-		providedPasteEditKinds: [tableKind, vscode.DocumentDropOrPasteEditKind.Text],
-		pasteMimeTypes: ['text/plain'],
-	});
+		{
+			providedPasteEditKinds: [tableKind, vscode.DocumentDropOrPasteEditKind.Text],
+			pasteMimeTypes: ['text/plain'],
+		},
+	);
 }

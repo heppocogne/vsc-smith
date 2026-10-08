@@ -11,11 +11,18 @@ function render(source: string, enabled = true): string {
 
 suite('mermaid plugin', () => {
 	test('mermaid fence', () => {
-		assert.strictEqual(render('```mermaid\ngraph TD\n  A --> B\n```\n'), '<pre class="vsc-smith-mermaid">graph TD\n  A --&gt; B\n</pre>\n');
+		assert.strictEqual(
+			render('```mermaid\ngraph TD\n  A --> B\n```\n'),
+			'<pre class="vsc-smith-mermaid">graph TD\n  A --&gt; B\n</pre>\n',
+		);
 	});
 
 	test('tilde fence, case-insensitive language, text after the language', () => {
-		for (const source of ['~~~mermaid\ngraph TD\n~~~\n', '```Mermaid\ngraph TD\n```\n', '``` mermaid title\ngraph TD\n```\n']) {
+		for (const source of [
+			'~~~mermaid\ngraph TD\n~~~\n',
+			'```Mermaid\ngraph TD\n```\n',
+			'``` mermaid title\ngraph TD\n```\n',
+		]) {
 			assert.strictEqual(render(source), '<pre class="vsc-smith-mermaid">graph TD\n</pre>\n', source);
 		}
 	});
@@ -33,7 +40,13 @@ suite('mermaid plugin', () => {
 	});
 
 	test('not a mermaid fence', () => {
-		for (const source of ['```js\ngraph TD\n```\n', '```\nmermaid\n```\n', '```mermaidjs\ngraph TD\n```\n', '    mermaid\n', '`mermaid`\n']) {
+		for (const source of [
+			'```js\ngraph TD\n```\n',
+			'```\nmermaid\n```\n',
+			'```mermaidjs\ngraph TD\n```\n',
+			'    mermaid\n',
+			'`mermaid`\n',
+		]) {
 			assert.ok(!render(source).includes('vsc-smith-mermaid'), source);
 		}
 	});
@@ -59,7 +72,10 @@ suite('mermaid plugin', () => {
 	});
 
 	test('disabled', () => {
-		assert.strictEqual(render('```mermaid\ngraph TD\n```\n', false), '<pre><code class="language-mermaid">graph TD\n</code></pre>\n');
+		assert.strictEqual(
+			render('```mermaid\ngraph TD\n```\n', false),
+			'<pre><code class="language-mermaid">graph TD\n</code></pre>\n',
+		);
 	});
 });
 

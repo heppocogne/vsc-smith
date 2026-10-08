@@ -23,7 +23,11 @@ export function taskListPlugin(md: MarkdownIt, isEnabled: () => boolean): void {
 		const tokens = state.tokens;
 		for (let i = 2; i < tokens.length; i++) {
 			const inline = tokens[i];
-			if (inline.type !== 'inline' || tokens[i - 1].type !== 'paragraph_open' || tokens[i - 2].type !== 'list_item_open') {
+			if (
+				inline.type !== 'inline' ||
+				tokens[i - 1].type !== 'paragraph_open' ||
+				tokens[i - 2].type !== 'list_item_open'
+			) {
 				continue;
 			}
 			// The raw source is checked as well, so that an escaped `\[ ]` stays as text.

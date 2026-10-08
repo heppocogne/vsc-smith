@@ -35,7 +35,9 @@ suite('fileSize', () => {
 
 	suite('FileSizeDecorationProvider', () => {
 		let provider: FileSizeDecorationProvider;
-		setup(() => { provider = new FileSizeDecorationProvider(); });
+		setup(() => {
+			provider = new FileSizeDecorationProvider();
+		});
 		teardown(() => provider.dispose());
 
 		test('puts the size in the tooltip without a badge', async () => {

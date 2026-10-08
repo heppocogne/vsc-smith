@@ -101,9 +101,7 @@ export function enterEdit(line: string, cursor: number, options: IndentOptions):
 		if (item.marker && item.indent) {
 			return replaceItem(item, { ...item, indent: outdentIndent(item.indent, options.tabSize), body: '' }, cursor);
 		}
-		const text = item.marker
-			? item.quote
-			: item.quote.replace(/>[ \t]?$/, '').replace(/^[ \t]+$/, ''); // removes the innermost `>`
+		const text = item.marker ? item.quote : item.quote.replace(/>[ \t]?$/, '').replace(/^[ \t]+$/, ''); // removes the innermost `>`
 		return { text, line: 0, character: text.length };
 	}
 

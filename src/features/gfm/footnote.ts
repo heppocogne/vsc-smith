@@ -74,7 +74,7 @@ function definitionRule(isEnabled: () => boolean) {
 		while (pos < max) {
 			const ch = state.src.charCodeAt(pos);
 			if (ch === TAB) {
-				offset += 4 - offset % 4;
+				offset += 4 - (offset % 4);
 			} else if (ch === SPACE) {
 				offset++;
 			} else {
@@ -195,7 +195,9 @@ function tailRule(isEnabled: () => boolean) {
 
 /** GitHub-style footnotes: `[^label]` references and `[^label]: text` definitions. */
 export function footnotePlugin(md: MarkdownIt, isEnabled: () => boolean): void {
-	md.block.ruler.before('reference', 'vsc_smith_footnote_def', definitionRule(isEnabled), { alt: ['paragraph', 'reference'] });
+	md.block.ruler.before('reference', 'vsc_smith_footnote_def', definitionRule(isEnabled), {
+		alt: ['paragraph', 'reference'],
+	});
 	md.inline.ruler.after('image', 'vsc_smith_footnote_ref', referenceRule(isEnabled));
 	md.core.ruler.after('inline', 'vsc_smith_footnote_tail', tailRule(isEnabled));
 
@@ -205,9 +207,11 @@ export function footnotePlugin(md: MarkdownIt, isEnabled: () => boolean): void {
 		const { id, subId, label } = tokens[i].meta as { id: number; subId: number; label: string };
 		return `<sup class="footnote-ref"><a href="#${anchorId('fn', label)}" id="${anchorId('fnref', label, subId)}">${id + 1}</a></sup>`;
 	};
-	rules['footnote_block_open'] = () => '<section class="footnotes">\n<hr class="footnotes-sep">\n<ol class="footnotes-list">\n';
+	rules['footnote_block_open'] = () =>
+		'<section class="footnotes">\n<hr class="footnotes-sep">\n<ol class="footnotes-list">\n';
 	rules['footnote_block_close'] = () => '</ol>\n</section>\n';
-	rules['footnote_open'] = (tokens, i) => `<li id="${escapeHtml(anchorId('fn', tokens[i].meta.label))}" class="footnote-item">`;
+	rules['footnote_open'] = (tokens, i) =>
+		`<li id="${escapeHtml(anchorId('fn', tokens[i].meta.label))}" class="footnote-item">`;
 	rules['footnote_close'] = () => '</li>\n';
 	rules['footnote_anchor'] = (tokens, i) => {
 		const { subId, label, multiple } = tokens[i].meta as { subId: number; label: string; multiple: boolean };

@@ -10,8 +10,14 @@ function render(source: string, position: CopyButtonPosition | null = 'top-right
 
 suite('copyButton plugin', () => {
 	test('fenced and indented code blocks are marked', () => {
-		assert.strictEqual(render('```js\na\n```\n'), '<pre data-vsc-smith-copy="top-right"><code class="language-js">a\n</code></pre>\n');
-		assert.strictEqual(render('    a\n', 'bottom-right'), '<pre data-vsc-smith-copy="bottom-right"><code>a\n</code></pre>\n');
+		assert.strictEqual(
+			render('```js\na\n```\n'),
+			'<pre data-vsc-smith-copy="top-right"><code class="language-js">a\n</code></pre>\n',
+		);
+		assert.strictEqual(
+			render('    a\n', 'bottom-right'),
+			'<pre data-vsc-smith-copy="bottom-right"><code>a\n</code></pre>\n',
+		);
 	});
 
 	test('inline code is not marked', () => {

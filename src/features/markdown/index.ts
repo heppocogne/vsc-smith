@@ -144,15 +144,10 @@ const FULL_PREVIEW = 'vsc-smith.markdown.openFullPreview';
 
 /**
  * Opens the built-in preview as a tab of the current group (not beside it, unlike "Open Preview to the Side"),
- * then maximizes the group and hides the side bar. Running it again on the maximized group restores the layout.
+ * so that it fills the editor area.
  */
 async function openFullPreview(): Promise<void> {
 	await vscode.commands.executeCommand('markdown.showPreview');
-	try {
-		await vscode.commands.executeCommand('workbench.action.maximizeEditorHideSidebar');
-	} catch {
-		// Older VS Code without the command: the preview is still shown in the group.
-	}
 }
 
 const PASTE_AS_TABLE = 'vsc-smith.markdown.pasteAsTable';

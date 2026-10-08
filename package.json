@@ -14,6 +14,8 @@
     "onStartupFinished",
     "onCommand:vsc-smith.copyRelativePath.slash",
     "onCommand:vsc-smith.copyRelativePath.backslash",
+    "onCommand:vsc-smith.convertPathSeparators.slash",
+    "onCommand:vsc-smith.convertPathSeparators.backslash",
     "onCommand:vsc-smith.markdown.onEnter",
     "onCommand:vsc-smith.markdown.onTab",
     "onCommand:vsc-smith.markdown.onShiftTab",
@@ -57,7 +59,7 @@
           "vsc-smith.copyPath.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "copy-path: 相対パスを、標準の \"Copy Relative Path\" (explorer.copyRelativePathSeparator) とは逆の区切り文字でコピーするコマンドを有効にする (標準が / なら \\ 区切り、\\ なら / 区切り)"
+            "description": "copy-path: 相対パスを、標準の \"Copy Relative Path\" (explorer.copyRelativePathSeparator) とは逆の区切り文字でコピーするコマンドと、エディターの選択範囲のパス区切り文字を変換するコマンドを有効にする (標準が / なら \\ 区切り、\\ なら / 区切り)"
           }
         }
       },
@@ -161,6 +163,16 @@
         "category": "VSCodeSmith"
       },
       {
+        "command": "vsc-smith.convertPathSeparators.slash",
+        "title": "Convert Selected Path Separators to /",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.convertPathSeparators.backslash",
+        "title": "Convert Selected Path Separators to \\",
+        "category": "VSCodeSmith"
+      },
+      {
         "command": "vsc-smith.markdown.pasteAsTable",
         "title": "Paste as Markdown Table",
         "category": "VSCodeSmith"
@@ -168,6 +180,14 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "vsc-smith.convertPathSeparators.slash",
+          "when": "config.vsc-smith.copyPath.enabled && editorHasSelection && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.convertPathSeparators.backslash",
+          "when": "config.vsc-smith.copyPath.enabled && editorHasSelection && !editorReadonly"
+        },
         {
           "command": "vsc-smith.markdown.pasteAsTable",
           "when": "config.vsc-smith.markdown.enabled && config.vsc-smith.markdown.pasteTable.enabled && editorLangId == markdown && !editorReadonly"
@@ -193,6 +213,18 @@
           "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')",
           "group": "6_copypath",
           "order": 60
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "vsc-smith.convertPathSeparators.slash",
+          "when": "config.vsc-smith.copyPath.enabled && editorHasSelection && !editorReadonly",
+          "group": "1_modification@90"
+        },
+        {
+          "command": "vsc-smith.convertPathSeparators.backslash",
+          "when": "config.vsc-smith.copyPath.enabled && editorHasSelection && !editorReadonly",
+          "group": "1_modification@91"
         }
       ],
       "editor/title/context": [
@@ -268,4 +300,4 @@
   "dependencies": {
     "mermaid": "^12.1.0"
   }
-}
+}

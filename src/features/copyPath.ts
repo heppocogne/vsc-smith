@@ -19,6 +19,31 @@ export function convertSeparators(p: string, sep: Separator, platform: NodeJS.Pl
 }
 
 /**
+ * Rewrites every path separator in selected text to `sep`.
+ * Unlike `convertSeparators`, both kinds are rewritten on every platform: the user chose this text explicitly,
+ * and it may well be a path from another OS.
+ */
+export function convertSelectedSeparators(text: string, sep: Separator): string {
+	return text.replace(/[\\/]/g, sep);
+}
+
+/** Rewrites the path separators of every non-empty selection in the editor. Returns false when nothing changed. */
+export async function convertSelections(editor: vscode.TextEditor, sep: Separator): Promise<boolean> {
+	const targets = editor.selections
+		.filter(selection => !selection.isEmpty)
+		.map(selection => ({ selection, text: editor.document.getText(selection) }))
+		.filter(({ text }) => convertSelectedSeparators(text, sep) !== text);
+	if (targets.length === 0) {
+		return false;
+	}
+	return editor.edit(builder => {
+		for (const { selection, text } of targets) {
+			builder.replace(selection, convertSelectedSeparators(text, sep));
+		}
+	});
+}
+
+/**
  * Resolves the resources a copy command acts on, in the same way as the built-in "Copy Path":
  * the explorer passes the clicked resource and the whole selection, the command palette passes nothing.
  */
@@ -47,6 +72,11 @@ export const COMMANDS: { id: string; sep: Separator }[] = [
 	{ id: 'vsc-smith.copyRelativePath.backslash', sep: '\\' },
 ];
 
+export const CONVERT_COMMANDS: { id: string; sep: Separator }[] = [
+	{ id: 'vsc-smith.convertPathSeparators.slash', sep: '/' },
+	{ id: 'vsc-smith.convertPathSeparators.backslash', sep: '\\' },
+];
+
 // Which of the two commands is shown depends on `explorer.copyRelativePathSeparator` and is decided by the `when`
 // clauses in package.json, which also hide both while the feature is disabled.
 export function registerCopyPath(context: vscode.ExtensionContext): void {
@@ -56,6 +86,9 @@ export function registerCopyPath(context: vscode.ExtensionContext): void {
 			if (text !== undefined) {
 				await vscode.env.clipboard.writeText(text);
 			}
+		})),
+		...CONVERT_COMMANDS.map(({ id, sep }) => vscode.commands.registerTextEditorCommand(id, editor => {
+			void convertSelections(editor, sep);
 		})),
 	)));
 }

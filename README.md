@@ -23,6 +23,11 @@ VSCode 1.70以降を想定しています。
 - `VSCodeSmith: Copy Relative Path (/)`
 - `VSCodeSmith: Copy Relative Path (\)`
 
+エディターで選択した範囲のパス区切り文字を `/` または `\` に置き換えるコマンドも追加します (複数選択に対応。右クリックメニューとコマンドパレットから実行できます)。`/` と `\` の両方を、OS に関係なく置き換えます。
+
+- `VSCodeSmith: Convert Selected Path Separators to /`
+- `VSCodeSmith: Convert Selected Path Separators to \`
+
 ### Markdown
 
 VSCode標準のMarkdownサポート+多少の構文補完です。

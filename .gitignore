@@ -6,3 +6,5 @@ node_modules
 
 .serena/
 .claude/
+
+__pycache__

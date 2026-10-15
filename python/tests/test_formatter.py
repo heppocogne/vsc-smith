@@ -184,6 +184,7 @@ class FormatTest(unittest.TestCase):
             """,
         )
 
+    @unittest.skipIf(sys.version_info < (3, 10), "match statements need Python 3.10")
     def test_elif_chain_and_match(self):
         self.check(
             """

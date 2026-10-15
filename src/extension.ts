@@ -6,6 +6,7 @@ import { registerGfm } from './features/gfm';
 import { registerMarkdown } from './features/markdown';
 import { registerMdEdit } from './features/mdEdit';
 import { registerMermaid } from './features/mermaid';
+import { registerPythonFormat } from './features/pythonFormat';
 import { MarkdownItExtension } from './util/markdownPreview';
 
 export function activate(context: vscode.ExtensionContext): MarkdownItExtension {
@@ -13,6 +14,7 @@ export function activate(context: vscode.ExtensionContext): MarkdownItExtension 
 	registerCopyPath(context);
 	registerMarkdown(context);
 	registerMdEdit(context);
+	registerPythonFormat(context);
 	const plugins = [registerGfm(context), registerMermaid(context), registerCopyButton(context)];
 	return {
 		extendMarkdownIt: md => plugins.reduce((result, plugin) => plugin.extendMarkdownIt(result), md),

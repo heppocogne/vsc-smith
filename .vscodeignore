@@ -18,3 +18,5 @@ node_modules/**
 .jj
 .claude
 .serena
+python/**/__pycache__/**
+python/tests/**

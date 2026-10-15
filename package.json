@@ -124,6 +124,22 @@
         }
       },
       {
+        "title": "Python Format",
+        "properties": {
+          "vsc-smith.pythonFormat.enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "pythonFormat: Python のフォーマッター (Black 風の簡易版) を登録する。使うには Python 3.9 以降が必要で、`editor.defaultFormatter` に `heppocogne.vsc-smith` を指定する"
+          },
+          "vsc-smith.pythonFormat.pythonPath": {
+            "type": "string",
+            "default": "",
+            "scope": "machine-overridable",
+            "description": "pythonFormat: フォーマッターの実行に使う Python (空の場合は Windows では python、それ以外では python3)"
+          }
+        }
+      },
+      {
         "title": "GFM",
         "properties": {
           "vsc-smith.gfm.enabled": {

@@ -151,3 +151,17 @@ export function isInFencedCodeBlock(lineAt: (line: number) => string, lineNo: nu
 	}
 	return open !== undefined;
 }
+
+/** Returns the part of `oldText` (as offsets) that differs from `newText`, and its replacement. */
+export function changedPart(oldText: string, newText: string): { start: number; end: number; text: string } {
+	const max = Math.min(oldText.length, newText.length);
+	let start = 0;
+	while (start < max && oldText[start] === newText[start]) {
+		start++;
+	}
+	let tail = 0;
+	while (tail < max - start && oldText[oldText.length - 1 - tail] === newText[newText.length - 1 - tail]) {
+		tail++;
+	}
+	return { start, end: oldText.length - tail, text: newText.slice(start, newText.length - tail) };
+}

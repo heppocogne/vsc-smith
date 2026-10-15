@@ -33,6 +33,19 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 
 既存の分割プレビューとは別に、コマンド `VSCodeSmith: Open Preview` (エディタータイトルのボタン、またはコマンドパレット) で、プレビューを現在のエディターグループのタブとして開きます。
 
+#### 編集コマンド (mdEdit)
+
+コマンドパレットの `VSCodeSmith:` から使えます。
+
+| コマンド | 内容 | 既定のキー |
+| --- | --- | --- |
+| Toggle Task | 選択行の `- [ ]` / `- [x]` を切り替える。チェックボックスの無いリスト項目はタスクにする | `Alt+C` |
+| Paste URL as Link | 文字列を選択して URL を貼り付けると `[選択文字](URL)` にする。URL 以外は通常の貼り付け | `Ctrl+V` (選択あり) |
+| Insert Date and Time | 日時を挿入する。書式は `vsc-smith.mdEdit.dateTimeFormat` | — |
+| Toggle Bold / Italic / Strikethrough / Inline Code | 選択範囲 (無ければカーソルの単語) を `**` / `*` / `~~` / `` ` `` で囲む。囲まれていれば外す | — |
+
+Markdown All in One が有効なときは、キーバインドをそちらに譲ります (コマンドは残ります)。
+
 #### GFM
 
 標準の Markdown プレビューに、GitHub Flavored Markdown の表示を足します(一部)。
@@ -66,6 +79,9 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 | `vsc-smith.markdown.pasteTable.enabled`      | `true` | タブ区切りテキストをテーブルとして貼り付けられるようにする |
 | `vsc-smith.markdown.pasteTable.default`      | `text` | タブ区切りテキストを最初に貼り付ける形式 (`text` / `table`) |
 | `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る    |
+| `vsc-smith.mdEdit.enabled`                   | `true` | Markdown の編集コマンドを有効にする               |
+| `vsc-smith.mdEdit.dateTimeFormat`            | `YYYY-MM-DD HH:mm` | 日時の挿入の書式                      |
+| `vsc-smith.mdEdit.yieldToMarkdownAllInOne`   | `true` | Markdown All in One が有効なときはキーを譲る      |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリスト・アラート・脚注を表示する      |
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
 | `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |

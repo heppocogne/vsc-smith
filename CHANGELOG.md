@@ -7,3 +7,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 
 - Initial release
+- Python Format: ast / tokenize だけで実装した Black 風の Python フォーマッターを追加 (既定は無効)

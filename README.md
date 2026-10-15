@@ -53,6 +53,27 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 
 標準の Markdown プレビューのコードブロックに、コードをクリップボードへコピーするボタンを表示します。ボタンはコードブロックにマウスを重ねると現れ、位置は左上・右上 (既定)・左下・右下から選べます。
 
+### Python Format
+
+Python のフォーマッター (Black 風の簡易版) を追加します。標準ライブラリの `ast` と `tokenize` だけで実装しており、フォーマッターのためにパッケージを追加する必要はありません (Python 3.9 以降が必要です)。既定では無効です。
+
+`vsc-smith.pythonFormat.enabled` を `true` にし、`editor.defaultFormatter` に `heppocogne.vsc-smith` を指定すると、`Format Document` (保存時のフォーマットを含む) で使えます。
+
+- 文字列は二重引用符にそろえ、演算子・カンマの前後の空白、括弧、空行 (トップレベルの定義の前後は 2 行、入れ子では 1 行) を整えます。
+- 1 行が 88 桁 (全角文字は 2 桁) を超えるときは、Black と同様に括弧や `and` / `+` などの位置で折り返し、複数行のコレクションには末尾にカンマを付けます。
+- コメントは保持します。ステートメントの途中にコメントがあるときは、そのステートメントを元の書式のままにします。
+- 整形の前後で AST が一致しない場合は、何も変更せずにエラーを返します。構文エラーのファイルも変更しません。
+
+Black との違い: マジックトレーリングカンマ (末尾のカンマで複数行を維持する)、範囲指定のフォーマット、`# fmt: off` / `# fmt: on` には対応していません。
+
+Python をコマンドラインから使うこともできます。
+
+```sh
+cd python
+python -m vsc_smith_pyfmt path/to/file.py        # 整形結果を標準出力へ (標準入力も可)
+python -m vsc_smith_pyfmt --check path/to/file.py # 変更が必要なら終了コード 1
+```
+
 ## 設定
 
 | 設定                                         | 既定値 | 説明                                              |
@@ -66,6 +87,8 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 | `vsc-smith.markdown.pasteTable.enabled`      | `true` | タブ区切りテキストをテーブルとして貼り付けられるようにする |
 | `vsc-smith.markdown.pasteTable.default`      | `text` | タブ区切りテキストを最初に貼り付ける形式 (`text` / `table`) |
 | `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る    |
+| `vsc-smith.pythonFormat.enabled`             | `false` | Python のフォーマッターを有効にする               |
+| `vsc-smith.pythonFormat.pythonPath`          | `""`   | フォーマッターの実行に使う Python (空なら `python3` / Windows は `python`) |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリスト・アラート・脚注を表示する      |
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
 | `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |

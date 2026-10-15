@@ -90,6 +90,26 @@ export function toggleWrap(before: string, text: string, after: string, marker: 
 	};
 }
 
+/** Returns the next number for a footnote label: the largest numeric label in the text plus one. */
+export function nextFootnoteLabel(text: string): number {
+	let max = 0;
+	for (const m of text.matchAll(/\[\^(\d+)\]/g)) {
+		max = Math.max(max, Number(m[1]));
+	}
+	return max + 1;
+}
+
+const FOOTNOTE_DEFINITION = /^\[\^[^\]\s]+\]:/;
+
+/**
+ * Returns the text that adds the definition of footnote `label` after the last non-blank line `lastLine` of the
+ * document: right below the previous definition, or after a blank line otherwise.
+ */
+export function footnoteDefinition(lastLine: string | undefined, label: number): string {
+	const separator = lastLine !== undefined && FOOTNOTE_DEFINITION.test(lastLine) ? '\n' : '\n\n';
+	return `${separator}[^${label}]: `;
+}
+
 const DATE_TOKEN = /\[([^\]]*)\]|YYYY|YY|MM|M|DD|D|HH|H|mm|ss/g;
 
 /**

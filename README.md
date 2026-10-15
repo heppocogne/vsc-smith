@@ -43,6 +43,10 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 | Paste URL as Link | 文字列を選択して URL を貼り付けると `[選択文字](URL)` にする。URL 以外は通常の貼り付け | `Ctrl+V` (選択あり) |
 | Insert Date and Time | 日時を挿入する。書式は `vsc-smith.mdEdit.dateTimeFormat` | — |
 | Toggle Bold / Italic / Strikethrough / Inline Code | 選択範囲 (無ければカーソルの単語) を `**` / `*` / `~~` / `` ` `` で囲む。囲まれていれば外す | — |
+| Insert Footnote | カーソル位置に `[^n]` を入れ、文書末尾に定義 `[^n]: ` を足してカーソルを移す (n は既存の数字ラベルの最大値 + 1) | — |
+| Move List Item Up / Down | リスト項目を子項目ごと、同じ階層の上下の項目と入れ替える。番号付きリストは番号を保つ。動かせないときは標準の行移動 | `Alt+↑` / `Alt+↓` |
+| Duplicate List Item | リスト項目を子項目ごと直下に複製する。番号付きリストは番号を振り直す | — |
+| Renumber Ordered List | カーソルのあるリスト (複数行選択ならその範囲) の番号を、階層ごとに最初の番号から振り直す | — |
 
 Markdown All in One が有効なときは、キーバインドをそちらに譲ります (コマンドは残ります)。
 

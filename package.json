@@ -18,7 +18,19 @@
     "onCommand:vsc-smith.markdown.onTab",
     "onCommand:vsc-smith.markdown.onShiftTab",
     "onCommand:vsc-smith.markdown.pasteAsTable",
-    "onCommand:vsc-smith.markdown.openPreview"
+    "onCommand:vsc-smith.markdown.openPreview",
+    "onCommand:vsc-smith.mdEdit.toggleTask",
+    "onCommand:vsc-smith.mdEdit.pasteUrl",
+    "onCommand:vsc-smith.mdEdit.insertDateTime",
+    "onCommand:vsc-smith.mdEdit.toggleBold",
+    "onCommand:vsc-smith.mdEdit.toggleItalic",
+    "onCommand:vsc-smith.mdEdit.toggleStrikethrough",
+    "onCommand:vsc-smith.mdEdit.toggleCode",
+    "onCommand:vsc-smith.mdEdit.insertFootnote",
+    "onCommand:vsc-smith.mdEdit.moveItemUp",
+    "onCommand:vsc-smith.mdEdit.moveItemDown",
+    "onCommand:vsc-smith.mdEdit.duplicateItem",
+    "onCommand:vsc-smith.mdEdit.renumberList"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -88,6 +100,26 @@
             "type": "boolean",
             "default": true,
             "description": "markdown: Markdown All in One が有効なときは、同等の機能を持つそちらに Enter / Tab / Shift+Tab を譲る (Markdown All in One 側でリスト継続を無効にしている場合は false にする)"
+          }
+        }
+      },
+      {
+        "title": "Markdown Edit",
+        "properties": {
+          "vsc-smith.mdEdit.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "mdEdit: Markdown の編集コマンド (タスクのトグル、URL の貼り付け、日時の挿入、太字・斜体などのトグル、脚注の挿入、リスト項目の移動・複製・番号の振り直し) を有効にする"
+          },
+          "vsc-smith.mdEdit.dateTimeFormat": {
+            "type": "string",
+            "default": "YYYY-MM-DD HH:mm",
+            "description": "mdEdit: 「日時を挿入」の書式。YYYY, YY, MM, M, DD, D, HH, H, mm, ss が使え、[...] で囲んだ部分はそのまま出力する"
+          },
+          "vsc-smith.mdEdit.yieldToMarkdownAllInOne": {
+            "type": "boolean",
+            "default": true,
+            "description": "mdEdit: Markdown All in One が有効なときは、同等の機能を持つそちらにキーバインド (タスクのトグル、URL の貼り付け、リスト項目の移動) を譲る。コマンドは残る"
           }
         }
       },
@@ -190,6 +222,66 @@
           "light": "media/icons/preview-light.svg",
           "dark": "media/icons/preview-dark.svg"
         }
+      },
+      {
+        "command": "vsc-smith.mdEdit.toggleTask",
+        "title": "Toggle Task",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.pasteUrl",
+        "title": "Paste URL as Link",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.insertDateTime",
+        "title": "Insert Date and Time",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.toggleBold",
+        "title": "Toggle Bold",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.toggleItalic",
+        "title": "Toggle Italic",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.toggleStrikethrough",
+        "title": "Toggle Strikethrough",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.toggleCode",
+        "title": "Toggle Inline Code",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.insertFootnote",
+        "title": "Insert Footnote",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.moveItemUp",
+        "title": "Move List Item Up",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.moveItemDown",
+        "title": "Move List Item Down",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.duplicateItem",
+        "title": "Duplicate List Item",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.mdEdit.renumberList",
+        "title": "Renumber Ordered List",
+        "category": "VSCodeSmith"
       }
     ],
     "menus": {
@@ -201,6 +293,54 @@
         {
           "command": "vsc-smith.markdown.pasteAsTable",
           "when": "config.vsc-smith.markdown.enabled && config.vsc-smith.markdown.pasteTable.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.toggleTask",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.pasteUrl",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.insertDateTime",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.toggleBold",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.toggleItalic",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.toggleStrikethrough",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.toggleCode",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.insertFootnote",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.moveItemUp",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.moveItemDown",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.duplicateItem",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+        },
+        {
+          "command": "vsc-smith.mdEdit.renumberList",
+          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
         },
         {
           "command": "vsc-smith.copyRelativePath.slash",
@@ -262,6 +402,27 @@
         "key": "shift+tab",
         "command": "vsc-smith.markdown.onShiftTab",
         "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus"
+      },
+      {
+        "key": "alt+c",
+        "command": "vsc-smith.mdEdit.toggleTask",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !vsc-smith.mdEdit.yieldToMaio"
+      },
+      {
+        "key": "ctrl+v",
+        "mac": "cmd+v",
+        "command": "vsc-smith.mdEdit.pasteUrl",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && editorHasSelection && !vsc-smith.mdEdit.yieldToMaio"
+      },
+      {
+        "key": "alt+up",
+        "command": "vsc-smith.mdEdit.moveItemUp",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
+      },
+      {
+        "key": "alt+down",
+        "command": "vsc-smith.mdEdit.moveItemDown",
+        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
       }
     ]
   },

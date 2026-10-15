@@ -1,10 +1,18 @@
 import * as vscode from 'vscode';
 import { ToggleableFeature } from '../../util/feature';
+import { MaioYield } from '../../util/maioYield';
 import { tsvToMarkdownTable } from './pasteTable';
-import { enterEdit, IndentOptions, indentEdit, isInFencedCodeBlock, LineEdit, outdentEdit } from './listEdit';
+import {
+	changedPart,
+	enterEdit,
+	IndentOptions,
+	indentEdit,
+	isInFencedCodeBlock,
+	LineEdit,
+	outdentEdit,
+} from './listEdit';
 
 const SECTION = 'vsc-smith.markdown';
-const MAIO_ID = 'yzhang.markdown-all-in-one';
 /** Context key used by the keybindings in package.json to leave the keys to Markdown All in One. */
 const YIELD_CONTEXT = 'vsc-smith.markdown.yieldToMaio';
 
@@ -35,7 +43,7 @@ export function registerMarkdown(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		new ToggleableFeature(SECTION, () =>
 			vscode.Disposable.from(
-				new MaioYield(),
+				new MaioYield(SECTION, YIELD_CONTEXT),
 				vscode.commands.registerCommand(PREVIEW, openPreview),
 				vscode.workspace.getConfiguration(SECTION).get<boolean>('pasteTable.enabled', true)
 					? registerPasteTable()
@@ -113,45 +121,6 @@ async function applyEdit(compute: ComputeEdit): Promise<boolean> {
 		return true;
 	}
 	return false;
-}
-
-/** Returns the part of `oldText` (as offsets) that differs from `newText`, and its replacement. */
-function changedPart(oldText: string, newText: string): { start: number; end: number; text: string } {
-	const max = Math.min(oldText.length, newText.length);
-	let start = 0;
-	while (start < max && oldText[start] === newText[start]) {
-		start++;
-	}
-	let tail = 0;
-	while (tail < max - start && oldText[oldText.length - 1 - tail] === newText[newText.length - 1 - tail]) {
-		tail++;
-	}
-	return { start, end: oldText.length - tail, text: newText.slice(start, newText.length - tail) };
-}
-
-/**
- * Sets the context key that disables the keybindings while Markdown All in One, which has its own list
- * continuation, is enabled. `vsc-smith.markdown.yieldToMarkdownAllInOne: false` keeps the keybindings.
- */
-class MaioYield implements vscode.Disposable {
-	private readonly listener: vscode.Disposable;
-
-	constructor() {
-		this.listener = vscode.extensions.onDidChange(() => this.update());
-		this.update();
-	}
-
-	private update(): void {
-		const enabled =
-			vscode.workspace.getConfiguration(SECTION).get<boolean>('yieldToMarkdownAllInOne', true) &&
-			vscode.extensions.getExtension(MAIO_ID) !== undefined;
-		void vscode.commands.executeCommand('setContext', YIELD_CONTEXT, enabled);
-	}
-
-	dispose(): void {
-		this.listener.dispose();
-		void vscode.commands.executeCommand('setContext', YIELD_CONTEXT, false);
-	}
 }
 
 const PREVIEW = 'vsc-smith.markdown.openPreview';

@@ -33,6 +33,23 @@ Enter で箇条書き・番号付きリスト・タスクリスト・引用を�
 
 既存の分割プレビューとは別に、コマンド `VSCodeSmith: Open Preview` (エディタータイトルのボタン、またはコマンドパレット) で、プレビューを現在のエディターグループのタブとして開きます。
 
+#### 編集コマンド (mdEdit)
+
+コマンドパレットの `VSCodeSmith:` から使えます。
+
+| コマンド | 内容 | 既定のキー |
+| --- | --- | --- |
+| Toggle Task | 選択行の `- [ ]` / `- [x]` を切り替える。チェックボックスの無いリスト項目はタスクにする | `Alt+C` |
+| Paste URL as Link | 文字列を選択して URL を貼り付けると `[選択文字](URL)` にする。URL 以外は通常の貼り付け | `Ctrl+V` (選択あり) |
+| Insert Date and Time | 日時を挿入する。書式は `vsc-smith.mdEdit.dateTimeFormat` | — |
+| Toggle Bold / Italic / Strikethrough / Inline Code | 選択範囲 (無ければカーソルの単語) を `**` / `*` / `~~` / `` ` `` で囲む。囲まれていれば外す | — |
+| Insert Footnote | カーソル位置に `[^n]` を入れ、文書末尾に定義 `[^n]: ` を足してカーソルを移す (n は既存の数字ラベルの最大値 + 1) | — |
+| Move List Item Up / Down | リスト項目を子項目ごと、同じ階層の上下の項目と入れ替える。番号付きリストは番号を保つ。動かせないときは標準の行移動 | `Alt+↑` / `Alt+↓` |
+| Duplicate List Item | リスト項目を子項目ごと直下に複製する。番号付きリストは番号を振り直す | — |
+| Renumber Ordered List | カーソルのあるリスト (複数行選択ならその範囲) の番号を、階層ごとに最初の番号から振り直す | — |
+
+Markdown All in One が有効なときは、キーバインドをそちらに譲ります (コマンドは残ります)。
+
 #### GFM
 
 標準の Markdown プレビューに、GitHub Flavored Markdown の表示を足します(一部)。
@@ -87,6 +104,9 @@ python -m vsc_smith_pyfmt --check path/to/file.py # 変更が必要なら終了�
 | `vsc-smith.markdown.pasteTable.enabled`      | `true` | タブ区切りテキストをテーブルとして貼り付けられるようにする |
 | `vsc-smith.markdown.pasteTable.default`      | `text` | タブ区切りテキストを最初に貼り付ける形式 (`text` / `table`) |
 | `vsc-smith.markdown.yieldToMarkdownAllInOne` | `true` | Markdown All in One が有効なときはそちらに譲る    |
+| `vsc-smith.mdEdit.enabled`                   | `true` | Markdown の編集コマンドを有効にする               |
+| `vsc-smith.mdEdit.dateTimeFormat`            | `YYYY-MM-DD HH:mm` | 日時の挿入の書式                      |
+| `vsc-smith.mdEdit.yieldToMarkdownAllInOne`   | `true` | Markdown All in One が有効なときはキーを譲る      |
 | `vsc-smith.pythonFormat.enabled`             | `false` | Python のフォーマッターを有効にする               |
 | `vsc-smith.pythonFormat.pythonPath`          | `""`   | フォーマッターの実行に使う Python (空なら `python3` / Windows は `python`) |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリスト・アラート・脚注を表示する      |

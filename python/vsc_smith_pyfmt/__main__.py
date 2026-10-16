@@ -8,16 +8,38 @@ from . import FormatError, Unsupported, format_source
 EXIT_ERROR = 123
 
 
+def parse_lines(spec: str) -> tuple[int, int]:
+    first, _, last = spec.partition("-")
+    try:
+        start, end = int(first), int(last or first)
+    except ValueError:
+        raise ValueError(f"invalid --lines value: {spec!r}") from None
+    if start < 1 or end < start:
+        raise ValueError(f"invalid --lines value: {spec!r}")
+    return start, end
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog="vsc_smith_pyfmt", description=__doc__)
     parser.add_argument("file", nargs="?", default="-", help="file to format; '-' or omitted reads stdin")
     parser.add_argument("--check", action="store_true", help="print nothing; exit 1 if the file would change")
+    parser.add_argument(
+        "--lines",
+        action="append",
+        default=[],
+        metavar="START-END",
+        help="format only the statements touching these 1-based lines (repeatable)",
+    )
     args = parser.parse_args(argv)
+    try:
+        lines = [parse_lines(spec) for spec in args.lines]
+    except ValueError as e:
+        parser.error(str(e))
 
     data = sys.stdin.buffer.read() if args.file == "-" else open(args.file, "rb").read()
     try:
         source = data.decode("utf-8")
-        result = format_source(source)
+        result = format_source(source, lines or None)
     except UnicodeDecodeError as e:
         print(f"error: not valid UTF-8: {e}", file=sys.stderr)
         return EXIT_ERROR

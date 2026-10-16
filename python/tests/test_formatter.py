@@ -360,5 +360,75 @@ class FormatTest(unittest.TestCase):
             format_source("def f(:\n")
 
 
+class RangeTest(unittest.TestCase):
+    SOURCE = textwrap.dedent(
+        """\
+        x=1
+        def f(a,b):
+            z=[1,2]
+            if a and  b :
+                return z
+            w =  {'k':1}   # keep
+            # own line
+            q  =  3
+        class  A:
+            v=1
+        """
+    )
+
+    def lines(self, *ranges):
+        return format_source(self.SOURCE, list(ranges)).split("\n")
+
+    def test_only_touched_statements_change(self):
+        result = self.lines((3, 3))
+        self.assertEqual(result[2], "    z = [1, 2]")
+        self.assertEqual(result[0], "x=1")
+        self.assertEqual(result[1], "def f(a,b):")
+        self.assertEqual(result[3], "    if a and  b :")
+        self.assertEqual(result[7], "    q  =  3")
+
+    def test_clause_header_and_trailing_comment(self):
+        result = self.lines((4, 4), (6, 6))
+        self.assertEqual(result[3], "    if a and b:")
+        self.assertEqual(result[5], '    w = {"k": 1}  # keep')
+        self.assertEqual(result[2], "    z=[1,2]")
+
+    def test_a_range_touching_a_multiline_statement_formats_all_of_it(self):
+        source = "x = [1,\n  2,\n  3]\ny=1\n"
+        self.assertEqual(format_source(source, [(2, 2)]), "x = [1, 2, 3]\ny=1\n")
+
+    def test_blank_lines_and_own_line_comments_are_never_touched(self):
+        source = "a=1\n\n\n\n# c\nb=2\n"
+        self.assertEqual(format_source(source, [(1, 6)]), "a = 1\n\n\n\n# c\nb = 2\n")
+
+    def test_a_line_shared_by_two_statements_is_left_alone(self):
+        self.assertEqual(format_source("a=1; b=2\nc=3\n", [(1, 2)]), "a=1; b=2\nc = 3\n")
+
+    def test_a_range_outside_every_statement_changes_nothing(self):
+        self.assertEqual(format_source(self.SOURCE, [(100, 120)]), self.SOURCE)
+
+    def test_the_whole_file_as_a_range_formats_every_statement(self):
+        result = format_source(self.SOURCE, [(1, 10)])
+        self.assertIn("class A:", result)
+        self.assertIn("    v = 1", result)
+        self.assertIn("def f(a, b):", result)
+
+    def test_long_statement_is_split_with_its_own_indentation(self):
+        source = "def f():\n    value = some_function(aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccc)\n"
+        self.assertEqual(
+            format_source(source, [(2, 2)]),
+            "def f():\n    value = some_function(\n        aaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccc\n    )\n",
+        )
+
+    def test_cli_rejects_a_bad_range(self):
+        from vsc_smith_pyfmt.__main__ import parse_lines
+
+        self.assertEqual(parse_lines("3-5"), (3, 5))
+        self.assertEqual(parse_lines("7"), (7, 7))
+        for bad in ("0", "5-3", "a-b"):
+            with self.assertRaises(ValueError):
+                parse_lines(bad)
+
+
 if __name__ == "__main__":
     unittest.main()

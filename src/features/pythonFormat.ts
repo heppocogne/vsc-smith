@@ -13,11 +13,26 @@ export function defaultPython(platform: NodeJS.Platform = process.platform): str
 	return platform === 'win32' ? 'python' : 'python3';
 }
 
-/** Runs the bundled formatter (`python/vsc_smith_pyfmt`) on `source` and resolves with the formatted text. */
-export function formatPython(python: string, extensionPath: string, source: string): Promise<string> {
+/** A 1-based, inclusive range of lines. */
+export interface LineRange {
+	start: number;
+	end: number;
+}
+
+/**
+ * Runs the bundled formatter (`python/vsc_smith_pyfmt`) on `source` and resolves with the formatted text.
+ * With `lines`, only the statements that touch those lines are formatted.
+ */
+export function formatPython(
+	python: string,
+	extensionPath: string,
+	source: string,
+	lines: LineRange[] = [],
+): Promise<string> {
 	const moduleRoot = path.join(extensionPath, 'python');
+	const args = ['-m', 'vsc_smith_pyfmt', ...lines.map(r => `--lines=${r.start}-${r.end}`)];
 	return new Promise((resolve, reject) => {
-		const child = spawn(python, ['-m', 'vsc_smith_pyfmt'], {
+		const child = spawn(python, args, {
 			cwd: moduleRoot,
 			env: { ...process.env, PYTHONPATH: moduleRoot, PYTHONIOENCODING: 'utf-8' },
 			stdio: ['pipe', 'pipe', 'pipe'],
@@ -44,31 +59,82 @@ export function formatPython(python: string, extensionPath: string, source: stri
 	});
 }
 
-export class PythonFormatProvider implements vscode.DocumentFormattingEditProvider {
+/**
+ * The single replacement that turns `original` into `formatted`, covering only the lines that differ,
+ * or `undefined` when they are equal. Offsets are UTF-16 code units, as in `TextDocument.offsetAt`.
+ */
+export function minimalEdit(
+	original: string,
+	formatted: string,
+): { start: number; end: number; text: string } | undefined {
+	if (original === formatted) {
+		return undefined;
+	}
+	// Each element keeps its own line break, so the last line without one is told apart from an empty line.
+	const split = (text: string) => text.match(/[^\n]*\n|[^\n]+$/g) ?? [];
+	const a = split(original);
+	const b = split(formatted);
+	let head = 0;
+	while (head < a.length && head < b.length && a[head] === b[head]) {
+		head++;
+	}
+	let tail = 0;
+	while (tail < a.length - head && tail < b.length - head && a[a.length - 1 - tail] === b[b.length - 1 - tail]) {
+		tail++;
+	}
+	const length = (lines: string[]) => lines.reduce((sum, l) => sum + l.length, 0);
+	return {
+		start: length(a.slice(0, head)),
+		end: original.length - length(a.slice(a.length - tail)),
+		text: b.slice(head, b.length - tail).join(''),
+	};
+}
+
+/** The 1-based lines a range touches; a range that ends at column 0 does not include that last line. */
+export function touchedLines(range: { start: { line: number }; end: { line: number; character: number } }): LineRange {
+	const endLine = range.end.character === 0 && range.end.line > range.start.line ? range.end.line - 1 : range.end.line;
+	return { start: range.start.line + 1, end: endLine + 1 };
+}
+
+export class PythonFormatProvider
+	implements vscode.DocumentFormattingEditProvider, vscode.DocumentRangeFormattingEditProvider
+{
 	constructor(private readonly extensionPath: string) {}
 
-	async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+	provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+		return this.format(document, []);
+	}
+
+	/** Formats the statements that touch `range` and nothing else, which is what "format modified lines" needs. */
+	provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range): Promise<vscode.TextEdit[]> {
+		return this.format(document, [touchedLines(range)]);
+	}
+
+	private async format(document: vscode.TextDocument, lines: LineRange[]): Promise<vscode.TextEdit[]> {
 		const configured = vscode.workspace.getConfiguration(SECTION, document.uri).get<string>('pythonPath', '').trim();
 		const original = document.getText();
-		const formatted = await formatPython(configured || defaultPython(), this.extensionPath, original);
-		if (formatted === original) {
+		const formatted = await formatPython(configured || defaultPython(), this.extensionPath, original, lines);
+		const edit = minimalEdit(original, formatted);
+		if (!edit) {
 			return [];
 		}
-		const whole = new vscode.Range(document.positionAt(0), document.positionAt(original.length));
-		return [vscode.TextEdit.replace(whole, formatted)];
+		const range = new vscode.Range(document.positionAt(edit.start), document.positionAt(edit.end));
+		return [vscode.TextEdit.replace(range, edit.text)];
 	}
 }
 
 export function registerPythonFormat(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
-		new ToggleableFeature(SECTION, () =>
-			vscode.languages.registerDocumentFormattingEditProvider(
-				[
-					{ language: 'python', scheme: 'file' },
-					{ language: 'python', scheme: 'untitled' },
-				],
-				new PythonFormatProvider(context.extensionPath),
-			),
-		),
+		new ToggleableFeature(SECTION, () => {
+			const selector = [
+				{ language: 'python', scheme: 'file' },
+				{ language: 'python', scheme: 'untitled' },
+			];
+			const provider = new PythonFormatProvider(context.extensionPath);
+			return vscode.Disposable.from(
+				vscode.languages.registerDocumentFormattingEditProvider(selector, provider),
+				vscode.languages.registerDocumentRangeFormattingEditProvider(selector, provider),
+			);
+		}),
 	);
 }

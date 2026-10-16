@@ -8,3 +8,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Initial release
 - Python Format: ast / tokenize だけで実装した Black 風の Python フォーマッターを追加 (既定は無効)
+- Python Format: 範囲指定のフォーマット (文単位) に対応し、`editor.formatOnSaveMode: modifications` で使えるようにした

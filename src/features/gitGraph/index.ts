@@ -11,6 +11,7 @@ import {
 	readChangedFiles,
 	readFileAt,
 	readLog,
+	setGitPath,
 } from './git';
 import { layoutGraph } from './graph';
 
@@ -47,6 +48,32 @@ function isActive(): boolean {
 
 function updateActiveKey(): void {
 	void vscode.commands.executeCommand('setContext', ACTIVE_KEY, isActive());
+}
+
+interface GitExtensionExports {
+	getAPI(version: 1): { git: { path: string } };
+}
+
+/**
+ * Points the git helpers at the git VS Code uses: the one the built-in Git extension found or `git.path` named,
+ * then the `git.path` setting itself (the extension may be disabled), then `git` on PATH.
+ */
+async function useConfiguredGit(): Promise<void> {
+	try {
+		const extension = vscode.extensions.getExtension<GitExtensionExports>('vscode.git');
+		if (extension) {
+			const exports = extension.isActive ? extension.exports : await extension.activate();
+			const found = exports.getAPI(1).git.path;
+			if (found) {
+				setGitPath(found);
+				return;
+			}
+		}
+	} catch {
+		// The Git extension is disabled or its API is unavailable: fall through to the setting.
+	}
+	const configured = vscode.workspace.getConfiguration('git').get<string | string[]>('path');
+	setGitPath((Array.isArray(configured) ? configured[0] : configured)?.trim());
 }
 
 /** Serves `git show <ref>:<path>` as a document, for the two sides of a commit diff. */
@@ -208,6 +235,7 @@ class GitGraphView implements vscode.WebviewViewProvider, vscode.Disposable {
 		if (!view) {
 			return;
 		}
+		await useConfiguredGit();
 		const post = (data: object) => void view.webview.postMessage({ type: 'data', ...data });
 		const empty = { commits: [], layout: { rows: [], laneCount: 0 }, hasMore: false };
 		try {
@@ -236,6 +264,7 @@ class GitGraphView implements vscode.WebviewViewProvider, vscode.Disposable {
 	/** Runs a command, reporting a failure as an error message, then refreshes the graph. */
 	private async run(action: () => Promise<void>): Promise<void> {
 		try {
+			await useConfiguredGit();
 			await action();
 		} catch (err) {
 			void vscode.window.showErrorMessage(err instanceof Error ? err.message : String(err));

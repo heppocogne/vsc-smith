@@ -36,10 +36,17 @@ export const LOG_FORMAT = ['%H', '%P', '%an', '%at', '%D', '%s'].join(FIELD) + R
 
 export class GitError extends Error {}
 
+let gitPath = 'git';
+
+/** Sets the git executable to run; an empty value restores `git` from PATH. */
+export function setGitPath(value: string | undefined): void {
+	gitPath = value || 'git';
+}
+
 export function git(cwd: string, args: string[]): Promise<string> {
 	return new Promise((resolve, reject) => {
 		execFile(
-			'git',
+			gitPath,
 			args,
 			{
 				cwd,
@@ -53,7 +60,7 @@ export function git(cwd: string, args: string[]): Promise<string> {
 					return;
 				}
 				const message = `${stderr}${stdout}`.trim() || err.message;
-				reject(new GitError((err as NodeJS.ErrnoException).code === 'ENOENT' ? 'git not found' : message));
+				reject(new GitError((err as NodeJS.ErrnoException).code === 'ENOENT' ? `git not found: ${gitPath}` : message));
 			},
 		);
 	});

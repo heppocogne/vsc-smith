@@ -2,11 +2,29 @@ import * as assert from 'assert';
 import { execFileSync } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { git, parseDecoration, parseLog, parseNameStatus, readChangedFiles, readLog } from '../features/gitGraph/git';
+import {
+	git,
+	setGitPath,
+	parseDecoration,
+	parseLog,
+	parseNameStatus,
+	readChangedFiles,
+	readLog,
+} from '../features/gitGraph/git';
 import { layoutGraph } from '../features/gitGraph/graph';
 import { makeTempDir, removeTempDir } from './helpers';
 
 suite('gitGraph', () => {
+	test('setGitPath selects the executable', async () => {
+		try {
+			setGitPath('/nonexistent/git');
+			await assert.rejects(git(process.cwd(), ['--version']), /git not found: \/nonexistent\/git/);
+		} finally {
+			setGitPath(undefined);
+		}
+		assert.match(await git(process.cwd(), ['--version']), /^git version/);
+	});
+
 	suite('parseDecoration', () => {
 		test('current branch, other refs and tags', () => {
 			assert.deepStrictEqual(

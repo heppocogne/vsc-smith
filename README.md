@@ -77,6 +77,8 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 - コミットを右クリック: `Show Diff` (変更ファイルを選んで親コミットとの差分を開く。ダブルクリックでも可)、`Create Branch Here`
 - ブランチ (ラベル) を右クリック: `Rename Branch`、`Delete Branch` (ローカルのみ)、`Merge into Current Branch`、`Rebase Current Branch onto This`
 
+git は VS Code の Git 拡張が使うもの (`git.path` 設定、または自動検出されたもの) を使います。
+
 Git Graph (`mhutchie.git-graph`) か GitLens (`eamodio.gitlens`) が有効なときは、既定でそちらに譲ってビューを表示しません (`vsc-smith.gitGraph.yieldToOtherExtensions`)。
 
 ### Python Format

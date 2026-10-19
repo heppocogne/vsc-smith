@@ -3,6 +3,7 @@ import { registerCopyButton } from './features/copyButton';
 import { registerCopyPath } from './features/copyPath';
 import { registerFileSize } from './features/fileSize';
 import { registerGfm } from './features/gfm';
+import { registerGitGraph } from './features/gitGraph';
 import { registerMarkdown } from './features/markdown';
 import { registerMdEdit } from './features/mdEdit';
 import { registerMermaid } from './features/mermaid';
@@ -15,6 +16,7 @@ export function activate(context: vscode.ExtensionContext): MarkdownItExtension 
 	registerMarkdown(context);
 	registerMdEdit(context);
 	registerPythonFormat(context);
+	registerGitGraph(context);
 	const plugins = [registerGfm(context), registerMermaid(context), registerCopyButton(context)];
 	return {
 		extendMarkdownIt: md => plugins.reduce((result, plugin) => plugin.extendMarkdownIt(result), md),

@@ -70,6 +70,15 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 
 標準の Markdown プレビューのコードブロックに、コードをクリップボードへコピーするボタンを表示します。ボタンはコードブロックにマウスを重ねると現れ、位置は左上・右上 (既定)・左下・右下から選べます。
 
+### Git Graph
+
+コミットグラフを、パネルの「Git Graph (Smith)」ビューに表示します (`git log --all --date-order` 相当、300 件ずつ「Load more」で追加)。ワークスペースの最初の git リポジトリを対象にし、ブランチの作成・削除・コミットなどでグラフが更新されます。
+
+- コミットを右クリック: `Show Diff` (変更ファイルを選んで親コミットとの差分を開く。ダブルクリックでも可)、`Create Branch Here`
+- ブランチ (ラベル) を右クリック: `Rename Branch`、`Delete Branch` (ローカルのみ)、`Merge into Current Branch`、`Rebase Current Branch onto This`
+
+Git Graph (`mhutchie.git-graph`) か GitLens (`eamodio.gitlens`) が有効なときは、既定でそちらに譲ってビューを表示しません (`vsc-smith.gitGraph.yieldToOtherExtensions`)。
+
 ### Python Format
 
 Python のフォーマッター (Black 風の簡易版) を追加します。標準ライブラリの `ast` と `tokenize` だけで実装しており、フォーマッターのためにパッケージを追加する必要はありません (Python 3.9 以降が必要です)。既定では無効です。
@@ -107,6 +116,8 @@ python -m vsc_smith_pyfmt --check path/to/file.py # 変更が必要なら終了�
 | `vsc-smith.mdEdit.enabled`                   | `true` | Markdown の編集コマンドを有効にする               |
 | `vsc-smith.mdEdit.dateTimeFormat`            | `YYYY-MM-DD HH:mm` | 日時の挿入の書式                      |
 | `vsc-smith.mdEdit.yieldToMarkdownAllInOne`   | `true` | Markdown All in One が有効なときはキーを譲る      |
+| `vsc-smith.gitGraph.enabled`                 | `true` | コミットグラフを有効にする                        |
+| `vsc-smith.gitGraph.yieldToOtherExtensions`  | `true` | Git Graph / GitLens が有効なときはそちらに譲る    |
 | `vsc-smith.pythonFormat.enabled`             | `false` | Python のフォーマッターを有効にする               |
 | `vsc-smith.pythonFormat.pythonPath`          | `""`   | フォーマッターの実行に使う Python (空なら `python3` / Windows は `python`) |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリスト・アラート・脚注を表示する      |

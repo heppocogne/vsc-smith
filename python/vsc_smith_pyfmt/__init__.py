@@ -3,8 +3,10 @@
 import ast
 import inspect
 import tokenize
+from typing import Optional
 
 from .formatter import Formatter, Unsupported
+from .ranges import format_lines
 
 __all__ = ["format_source", "FormatError", "Unsupported"]
 
@@ -28,8 +30,11 @@ def _normalized_dump(tree: ast.AST) -> str:
     return ast.dump(tree)
 
 
-def format_source(source: str) -> str:
-    """Return `source` formatted. Raises `SyntaxError`, `Unsupported` or `FormatError` instead of guessing."""
+def format_source(source: str, lines: Optional[list[tuple[int, int]]] = None) -> str:
+    """Return `source` formatted. Raises `SyntaxError`, `Unsupported` or `FormatError` instead of guessing.
+
+    With `lines` (1-based, inclusive ranges), only the statements that touch those lines are formatted.
+    """
     bom = "﻿" if source.startswith("﻿") else ""
     newline = "\r\n" if "\r\n" in source else "\n"
     text = source[len(bom) :].replace("\r\n", "\n")
@@ -37,7 +42,7 @@ def format_source(source: str) -> str:
         return ""
     tree = ast.parse(text)  # raises SyntaxError first, so tokenize errors below are never about invalid code
     try:
-        result = Formatter(text).run(tree)
+        result = format_lines(text, tree, lines) if lines else Formatter(text).run(tree)
     except tokenize.TokenError as e:
         raise Unsupported(f"cannot tokenize: {e}") from e
     if _normalized_dump(ast.parse(result)) != _normalized_dump(ast.parse(text)):

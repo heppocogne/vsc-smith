@@ -52,6 +52,7 @@
 | 10  | Markdown の編集コマンド                  | `vsc-smith.mdEdit`   | 実装・自動テスト済み                            |
 | 11  | コピー系の追加                           | `vsc-smith.copyPath` | 計画 (6 の拡張)                                 |
 | 12  | 脚注 (プレビュー・補助)                  | `vsc-smith.footnote` | 計画 (他の脚注拡張に譲る)                       |
+| 13  | Git Graph                                | `vsc-smith.gitGraph` | 実装・自動テスト済み (Webview は手動確認が必要) |
 
 ---
 
@@ -390,3 +391,28 @@ VS Code 標準のプレビュー (markdown-it) は脚注 `[^1]` に対応して�
 - 自動: 実物の markdown-it に通した HTML (参照・定義の対応、複数参照、未定義、エスケープ、コード内、無効時)、
   純粋関数 (次の番号の決定、挿入位置)、`activate` の戻り値が設定に追従すること。
 - 手動: プレビューの表示、定義へ/戻りのジャンプ、ダークテーマ、他の脚注拡張を有効にしたとき二重表示にならないこと。
+
+---
+
+## 13. Git Graph (`gitGraph`)
+
+パネルの Webview ビューにコミットグラフを表示し、右クリックメニューで操作する。
+
+### 方針
+
+- `git` CLI を直接実行する (`src/features/gitGraph/git.ts`)。標準の Git 拡張 API には依存しない。
+- 配置 (レーン割り当て) は `vscode` に依存しない純粋関数 `layoutGraph` (`graph.ts`)。`git log --all --date-order` の順序を前提にする。
+- 描画は `media/gitGraph.js` が行ごとの SVG で行う。右クリックは `data-vscode-context` と `webview/context` メニューを使い、
+  コマンドは引数でコミット/ブランチ (`hash`, `branch`, `branchKind`, `isCurrent`) を受け取る。
+- 差分は `vsc-smith-git:` スキームの仮想ドキュメント (`git show <ref>:<path>`) を `vscode.diff` で比較する。
+  マージコミットは第 1 親との差分。複数ファイルはクイックピックで 1 つ選ぶ。
+- 更新は `.git/HEAD`・`refs/**`・`packed-refs` の監視、コマンド実行後、ビューの再表示、更新ボタンで行う。
+- Git Graph (`mhutchie.git-graph`)・GitLens (`eamodio.gitlens`) が有効なときは、コンテキストキー
+  `vsc-smith.gitGraph.active` を false にしてビューとコマンドを隠す (`yieldToOtherExtensions`)。
+- マージ/リベースは確認ダイアログを出し、`GIT_EDITOR=true` で非対話に実行する。競合したら SCM での解決を案内する。
+
+### 手動確認 (F5)
+
+- 複数ブランチ・マージのあるリポジトリでグラフが正しく描かれること。
+- コミット/ブランチの右クリックメニュー (差分・ブランチ作成・名前変更・削除・マージ・リベース) が動くこと。
+- 別ターミナルで `git commit` / `git branch` するとグラフが更新されること。

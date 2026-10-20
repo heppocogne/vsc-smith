@@ -30,7 +30,16 @@
     "onCommand:vsc-smith.mdEdit.moveItemUp",
     "onCommand:vsc-smith.mdEdit.moveItemDown",
     "onCommand:vsc-smith.mdEdit.duplicateItem",
-    "onCommand:vsc-smith.mdEdit.renumberList"
+    "onCommand:vsc-smith.mdEdit.renumberList",
+    "onView:vsc-smith.gitGraph",
+    "onCommand:vsc-smith.gitGraph.show",
+    "onCommand:vsc-smith.gitGraph.refresh",
+    "onCommand:vsc-smith.gitGraph.openDiff",
+    "onCommand:vsc-smith.gitGraph.createBranch",
+    "onCommand:vsc-smith.gitGraph.renameBranch",
+    "onCommand:vsc-smith.gitGraph.deleteBranch",
+    "onCommand:vsc-smith.gitGraph.mergeBranch",
+    "onCommand:vsc-smith.gitGraph.rebaseBranch"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -186,6 +195,21 @@
             "description": "copyButton: コピーボタンの位置"
           }
         }
+      },
+      {
+        "title": "Git Graph",
+        "properties": {
+          "vsc-smith.gitGraph.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "gitGraph: コミットグラフ (パネルの Git Graph ビュー) を有効にする。コミットの右クリックで差分の表示・ブランチ作成、ブランチの右クリックで名前変更・削除・マージ・リベースができる"
+          },
+          "vsc-smith.gitGraph.yieldToOtherExtensions": {
+            "type": "boolean",
+            "default": true,
+            "description": "gitGraph: Git Graph (mhutchie.git-graph) か GitLens (eamodio.gitlens) が有効なときは、そちらに譲って表示しない"
+          }
+        }
       }
     ],
     "markdown.markdownItPlugins": true,
@@ -282,6 +306,47 @@
         "command": "vsc-smith.mdEdit.renumberList",
         "title": "Renumber Ordered List",
         "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.show",
+        "title": "Show Git Graph",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.refresh",
+        "title": "Refresh Git Graph",
+        "category": "VSCodeSmith",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "vsc-smith.gitGraph.openDiff",
+        "title": "Show Diff",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.createBranch",
+        "title": "Create Branch Here",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.renameBranch",
+        "title": "Rename Branch",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.deleteBranch",
+        "title": "Delete Branch",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.mergeBranch",
+        "title": "Merge into Current Branch",
+        "category": "VSCodeSmith"
+      },
+      {
+        "command": "vsc-smith.gitGraph.rebaseBranch",
+        "title": "Rebase Current Branch onto This",
+        "category": "VSCodeSmith"
       }
     ],
     "menus": {
@@ -349,6 +414,38 @@
         {
           "command": "vsc-smith.copyRelativePath.backslash",
           "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')"
+        },
+        {
+          "command": "vsc-smith.gitGraph.show",
+          "when": "vsc-smith.gitGraph.active"
+        },
+        {
+          "command": "vsc-smith.gitGraph.refresh",
+          "when": "vsc-smith.gitGraph.active"
+        },
+        {
+          "command": "vsc-smith.gitGraph.openDiff",
+          "when": "false"
+        },
+        {
+          "command": "vsc-smith.gitGraph.createBranch",
+          "when": "false"
+        },
+        {
+          "command": "vsc-smith.gitGraph.renameBranch",
+          "when": "false"
+        },
+        {
+          "command": "vsc-smith.gitGraph.deleteBranch",
+          "when": "false"
+        },
+        {
+          "command": "vsc-smith.gitGraph.mergeBranch",
+          "when": "false"
+        },
+        {
+          "command": "vsc-smith.gitGraph.rebaseBranch",
+          "when": "false"
         }
       ],
       "explorer/context": [
@@ -384,6 +481,55 @@
           "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/') && resourceScheme != untitled",
           "group": "1_cutcopypaste",
           "order": 60
+        }
+      ],
+      "view/title": [
+        {
+          "command": "vsc-smith.gitGraph.refresh",
+          "when": "view == vsc-smith.gitGraph",
+          "group": "navigation"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "vsc-smith.gitGraph.openDiff",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+          "group": "1_commit@1"
+        },
+        {
+          "command": "vsc-smith.gitGraph.createBranch",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+          "group": "1_commit@2"
+        },
+        {
+          "command": "vsc-smith.gitGraph.createBranch",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+          "group": "1_commit@2"
+        },
+        {
+          "command": "vsc-smith.gitGraph.openDiff",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+          "group": "1_commit@1"
+        },
+        {
+          "command": "vsc-smith.gitGraph.renameBranch",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && branchKind == 'local'",
+          "group": "2_branch@1"
+        },
+        {
+          "command": "vsc-smith.gitGraph.deleteBranch",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && branchKind == 'local' && !isCurrent",
+          "group": "2_branch@2"
+        },
+        {
+          "command": "vsc-smith.gitGraph.mergeBranch",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
+          "group": "3_integrate@1"
+        },
+        {
+          "command": "vsc-smith.gitGraph.rebaseBranch",
+          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
+          "group": "3_integrate@2"
         }
       ]
     },
@@ -424,7 +570,26 @@
         "command": "vsc-smith.mdEdit.moveItemDown",
         "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "vsc-smith-gitGraph",
+          "title": "Git Graph (Smith)",
+          "icon": "media/icons/gitGraph.svg"
+        }
+      ]
+    },
+    "views": {
+      "vsc-smith-gitGraph": [
+        {
+          "type": "webview",
+          "id": "vsc-smith.gitGraph",
+          "name": "Git Graph",
+          "when": "vsc-smith.gitGraph.active"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

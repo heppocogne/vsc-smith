@@ -16,6 +16,16 @@ VSCode 1.70以降を想定しています。
 
 アクティブなファイルのサイズをステータスバーに表示し、エクスプローラーのツールチップにもサイズを表示します。
 
+### Terminal Restore
+
+ワークスペースを開き直したときに、前回開いていたターミナルを作り直します。復元するのは次の項目だけで、プロセスや履歴は復元しません。
+
+- 名前: ターミナルを作成したときに指定された名前か、後から変更された名前 (右クリックの「名前の変更」など)。変更されていない既定の名前は保存せず、シェルの標準のタイトルに任せます。
+- 作業ディレクトリ: VS Code 1.93 以降でシェル統合が有効なら、`cd` した後の現在のディレクトリ。それ以外は作成時のディレクトリ。
+- 環境変数: ターミナル作成時に指定されたもの (`terminal.integrated.env.*` や拡張機能が指定したもの)。シェルの中で `export` した変数は取得できないので復元できません。ワークスペースの保存領域に平文で保存されるので、秘密の値を含めたくないときは `vsc-smith.terminalRestore.restoreEnv` を `false` にしてください。
+
+変更は 1 秒ほど遅れて保存します。ウィンドウを閉じる直前の変更は反映されないことがあります。VS Code 標準のターミナル復元 (`terminal.integrated.enablePersistentSessions`) でターミナルが戻っているときは、重複を避けるため何もしません (`vsc-smith.terminalRestore.skipIfRestoredByVSCode`)。
+
 ### Copy Path
 
 標準の "Copy Relative Path" (`explorer.copyRelativePathSeparator`) とは逆の区切り文字で相対パスをコピーするコマンドを追加します。
@@ -113,6 +123,9 @@ python -m vsc_smith_pyfmt --lines 10-20 --lines 40 path/to/file.py # 触れた�
 | `vsc-smith.fileSize.statusBar`               | `true` | ステータスバーにサイズを表示する                  |
 | `vsc-smith.fileSize.statusBarAlignment`      | `left` | ステータスバー上の表示位置                        |
 | `vsc-smith.fileSize.explorerTooltip`         | `true` | エクスプローラーのツールチップにサイズを表示する  |
+| `vsc-smith.terminalRestore.enabled`          | `true` | ターミナルの名前・cwd・環境変数を復元する         |
+| `vsc-smith.terminalRestore.restoreEnv`       | `true` | 環境変数も保存・復元する                          |
+| `vsc-smith.terminalRestore.skipIfRestoredByVSCode` | `true` | VS Code 標準の復元でターミナルがあれば復元しない |
 | `vsc-smith.copyPath.enabled`                 | `true` | 逆区切り文字の相対パスコピーを有効にする          |
 | `vsc-smith.markdown.enabled`                 | `true` | Markdown のリスト継続・インデントを有効にする     |
 | `vsc-smith.markdown.pasteTable.enabled`      | `true` | タブ区切りテキストをテーブルとして貼り付けられるようにする |

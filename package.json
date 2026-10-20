@@ -1,637 +1,637 @@
 {
-  "name": "vsc-smith",
-  "displayName": "VSCode Smith",
-  "description": "雑多な拡張機能集",
-  "publisher": "heppocogne",
-  "version": "0.0.6",
-  "engines": {
-    "vscode": "^1.70.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished",
-    "onCommand:vsc-smith.copyRelativePath.slash",
-    "onCommand:vsc-smith.copyRelativePath.backslash",
-    "onCommand:vsc-smith.markdown.onEnter",
-    "onCommand:vsc-smith.markdown.onTab",
-    "onCommand:vsc-smith.markdown.onShiftTab",
-    "onCommand:vsc-smith.markdown.pasteAsTable",
-    "onCommand:vsc-smith.markdown.openPreview",
-    "onCommand:vsc-smith.mdEdit.toggleTask",
-    "onCommand:vsc-smith.mdEdit.pasteUrl",
-    "onCommand:vsc-smith.mdEdit.insertDateTime",
-    "onCommand:vsc-smith.mdEdit.toggleBold",
-    "onCommand:vsc-smith.mdEdit.toggleItalic",
-    "onCommand:vsc-smith.mdEdit.toggleStrikethrough",
-    "onCommand:vsc-smith.mdEdit.toggleCode",
-    "onCommand:vsc-smith.mdEdit.insertFootnote",
-    "onCommand:vsc-smith.mdEdit.moveItemUp",
-    "onCommand:vsc-smith.mdEdit.moveItemDown",
-    "onCommand:vsc-smith.mdEdit.duplicateItem",
-    "onCommand:vsc-smith.mdEdit.renumberList",
-    "onView:vsc-smith.gitGraph",
-    "onCommand:vsc-smith.gitGraph.show",
-    "onCommand:vsc-smith.gitGraph.refresh",
-    "onCommand:vsc-smith.gitGraph.openDiff",
-    "onCommand:vsc-smith.gitGraph.createBranch",
-    "onCommand:vsc-smith.gitGraph.renameBranch",
-    "onCommand:vsc-smith.gitGraph.deleteBranch",
-    "onCommand:vsc-smith.gitGraph.mergeBranch",
-    "onCommand:vsc-smith.gitGraph.rebaseBranch"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "configuration": [
-      {
-        "title": "File Size",
-        "properties": {
-          "vsc-smith.fileSize.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "file-size: ファイルサイズ表示機能を有効にする"
-          },
-          "vsc-smith.fileSize.statusBar": {
-            "type": "boolean",
-            "default": true,
-            "description": "file-size: アクティブなファイルのサイズをステータスバーに表示する"
-          },
-          "vsc-smith.fileSize.statusBarAlignment": {
-            "type": "string",
-            "enum": [
-              "left",
-              "right"
-            ],
-            "default": "left",
-            "description": "file-size: ステータスバー上の表示位置 (右側はテキストファイルで行/列・エンコーディングなどの項目と並ぶため、既定は左)"
-          },
-          "vsc-smith.fileSize.explorerTooltip": {
-            "type": "boolean",
-            "default": true,
-            "description": "file-size: エクスプローラーでファイルにホバーした時のツールチップにサイズを表示する"
-          }
-        }
-      },
-      {
-        "title": "Copy Path",
-        "properties": {
-          "vsc-smith.copyPath.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "copy-path: 相対パスを、標準の \"Copy Relative Path\" (explorer.copyRelativePathSeparator) とは逆の区切り文字でコピーするコマンドを有効にする (標準が / なら \\ 区切り、\\ なら / 区切り)"
-          }
-        }
-      },
-      {
-        "title": "Markdown",
-        "properties": {
-          "vsc-smith.markdown.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "markdown: Enter で箇条書き・番号付きリスト・タスクリスト・引用を継続し、Tab / Shift+Tab でリスト項目をインデント/アウトデントする"
-          },
-          "vsc-smith.markdown.pasteTable.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "markdown: スプレッドシートからコピーしたタブ区切りテキストを貼り付けたとき、Markdown のテーブルとして貼り付けるか、そのまま (タブ区切り) 貼り付けるかを、貼り付け後に表示される選択肢 (VS Code 1.87 以降) から切り替えられるようにする。それ以前の VS Code では「Paste as Markdown Table」コマンドでテーブルとして貼り付ける"
-          },
-          "vsc-smith.markdown.pasteTable.default": {
-            "type": "string",
-            "enum": [
-              "table",
-              "text"
-            ],
-            "default": "text",
-            "description": "markdown: タブ区切りテキストを貼り付けたとき最初に挿入する形式 (table: テーブルの書式, text: そのまま)。貼り付け直後の選択肢 (Ctrl+. など) でもう一方に切り替えられる"
-          },
-          "vsc-smith.markdown.yieldToMarkdownAllInOne": {
-            "type": "boolean",
-            "default": true,
-            "description": "markdown: Markdown All in One が有効なときは、同等の機能を持つそちらに Enter / Tab / Shift+Tab を譲る (Markdown All in One 側でリスト継続を無効にしている場合は false にする)"
-          }
-        }
-      },
-      {
-        "title": "Markdown Edit",
-        "properties": {
-          "vsc-smith.mdEdit.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "mdEdit: Markdown の編集コマンド (タスクのトグル、URL の貼り付け、日時の挿入、太字・斜体などのトグル、脚注の挿入、リスト項目の移動・複製・番号の振り直し) を有効にする"
-          },
-          "vsc-smith.mdEdit.dateTimeFormat": {
-            "type": "string",
-            "default": "YYYY-MM-DD HH:mm",
-            "description": "mdEdit: 「日時を挿入」の書式。YYYY, YY, MM, M, DD, D, HH, H, mm, ss が使え、[...] で囲んだ部分はそのまま出力する"
-          },
-          "vsc-smith.mdEdit.yieldToMarkdownAllInOne": {
-            "type": "boolean",
-            "default": true,
-            "description": "mdEdit: Markdown All in One が有効なときは、同等の機能を持つそちらにキーバインド (タスクのトグル、URL の貼り付け、リスト項目の移動) を譲る。コマンドは残る"
-          }
-        }
-      },
-      {
-        "title": "Python Format",
-        "properties": {
-          "vsc-smith.pythonFormat.enabled": {
-            "type": "boolean",
-            "default": false,
-            "description": "pythonFormat: Python のフォーマッター (Black 風の簡易版) を登録する。使うには Python 3.9 以降が必要で、`editor.defaultFormatter` に `heppocogne.vsc-smith` を指定する"
-          },
-          "vsc-smith.pythonFormat.pythonPath": {
-            "type": "string",
-            "default": "",
-            "scope": "machine-overridable",
-            "description": "pythonFormat: フォーマッターの実行に使う Python (空の場合は Windows では python、それ以外では python3)"
-          }
-        }
-      },
-      {
-        "title": "GFM",
-        "properties": {
-          "vsc-smith.gfm.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "gfm: Markdown プレビューでタスクリストのチェックボックス、アラート (> [!NOTE] など)、脚注 ([^1]) を表示する"
-          }
-        }
-      },
-      {
-        "title": "Mermaid",
-        "properties": {
-          "vsc-smith.mermaid.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "mermaid: Markdown プレビューで mermaid のコードブロックを図として表示する"
-          },
-          "vsc-smith.mermaid.yieldToOtherExtensions": {
-            "type": "boolean",
-            "default": true,
-            "description": "mermaid: VS Code 標準の Mermaid 表示 (1.121 以降の Mermaid Markdown Features) か Markdown Preview Mermaid Support が有効なときは、そちらに表示を譲る"
-          }
-        }
-      },
-      {
-        "title": "Copy Button",
-        "properties": {
-          "vsc-smith.copyButton.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "copyButton: Markdown プレビューのコードブロックにコピーボタンを表示する"
-          },
-          "vsc-smith.copyButton.position": {
-            "type": "string",
-            "enum": [
-              "top-right",
-              "bottom-right"
-            ],
-            "enumDescriptions": [
-              "右上",
-              "右下"
-            ],
-            "default": "top-right",
-            "description": "copyButton: コピーボタンの位置"
-          }
-        }
-      },
-      {
-        "title": "Git Graph",
-        "properties": {
-          "vsc-smith.gitGraph.enabled": {
-            "type": "boolean",
-            "default": true,
-            "description": "gitGraph: コミットグラフ (パネルの Git Graph ビュー) を有効にする。コミットの右クリックで差分の表示・ブランチ作成、ブランチの右クリックで名前変更・削除・マージ・リベースができる"
-          },
-          "vsc-smith.gitGraph.yieldToOtherExtensions": {
-            "type": "boolean",
-            "default": true,
-            "description": "gitGraph: Git Graph (mhutchie.git-graph) か GitLens (eamodio.gitlens) が有効なときは、そちらに譲って表示しない"
-          }
-        }
-      }
-    ],
-    "markdown.markdownItPlugins": true,
-    "markdown.previewStyles": [
-      "./media/gfm.css",
-      "./media/mermaid.css",
-      "./media/copyButton.css"
-    ],
-    "markdown.previewScripts": [
-      "./media/mermaid.js",
-      "./media/copyButton.js"
-    ],
-    "commands": [
-      {
-        "command": "vsc-smith.copyRelativePath.slash",
-        "title": "Copy Relative Path (/)",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.copyRelativePath.backslash",
-        "title": "Copy Relative Path (\\)",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.markdown.pasteAsTable",
-        "title": "Paste as Markdown Table",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.markdown.openPreview",
-        "title": "Open Preview",
-        "category": "VSCodeSmith",
-        "icon": {
-          "light": "media/icons/preview-light.svg",
-          "dark": "media/icons/preview-dark.svg"
-        }
-      },
-      {
-        "command": "vsc-smith.mdEdit.toggleTask",
-        "title": "Toggle Task",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.pasteUrl",
-        "title": "Paste URL as Link",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.insertDateTime",
-        "title": "Insert Date and Time",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.toggleBold",
-        "title": "Toggle Bold",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.toggleItalic",
-        "title": "Toggle Italic",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.toggleStrikethrough",
-        "title": "Toggle Strikethrough",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.toggleCode",
-        "title": "Toggle Inline Code",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.insertFootnote",
-        "title": "Insert Footnote",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.moveItemUp",
-        "title": "Move List Item Up",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.moveItemDown",
-        "title": "Move List Item Down",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.duplicateItem",
-        "title": "Duplicate List Item",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.mdEdit.renumberList",
-        "title": "Renumber Ordered List",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.show",
-        "title": "Show Git Graph",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.refresh",
-        "title": "Refresh Git Graph",
-        "category": "VSCodeSmith",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "vsc-smith.gitGraph.openDiff",
-        "title": "Show Diff",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.createBranch",
-        "title": "Create Branch Here",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.renameBranch",
-        "title": "Rename Branch",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.deleteBranch",
-        "title": "Delete Branch",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.mergeBranch",
-        "title": "Merge into Current Branch",
-        "category": "VSCodeSmith"
-      },
-      {
-        "command": "vsc-smith.gitGraph.rebaseBranch",
-        "title": "Rebase Current Branch onto This",
-        "category": "VSCodeSmith"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "vsc-smith.markdown.openPreview",
-          "when": "config.vsc-smith.markdown.enabled && editorLangId == markdown"
-        },
-        {
-          "command": "vsc-smith.markdown.pasteAsTable",
-          "when": "config.vsc-smith.markdown.enabled && config.vsc-smith.markdown.pasteTable.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.toggleTask",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.pasteUrl",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.insertDateTime",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.toggleBold",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.toggleItalic",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.toggleStrikethrough",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.toggleCode",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.insertFootnote",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.moveItemUp",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.moveItemDown",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.duplicateItem",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.mdEdit.renumberList",
-          "when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
-        },
-        {
-          "command": "vsc-smith.copyRelativePath.slash",
-          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))"
-        },
-        {
-          "command": "vsc-smith.copyRelativePath.backslash",
-          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')"
-        },
-        {
-          "command": "vsc-smith.gitGraph.show",
-          "when": "vsc-smith.gitGraph.active"
-        },
-        {
-          "command": "vsc-smith.gitGraph.refresh",
-          "when": "vsc-smith.gitGraph.active"
-        },
-        {
-          "command": "vsc-smith.gitGraph.openDiff",
-          "when": "false"
-        },
-        {
-          "command": "vsc-smith.gitGraph.createBranch",
-          "when": "false"
-        },
-        {
-          "command": "vsc-smith.gitGraph.renameBranch",
-          "when": "false"
-        },
-        {
-          "command": "vsc-smith.gitGraph.deleteBranch",
-          "when": "false"
-        },
-        {
-          "command": "vsc-smith.gitGraph.mergeBranch",
-          "when": "false"
-        },
-        {
-          "command": "vsc-smith.gitGraph.rebaseBranch",
-          "when": "false"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "vsc-smith.copyRelativePath.slash",
-          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))",
-          "group": "6_copypath",
-          "order": 60
-        },
-        {
-          "command": "vsc-smith.copyRelativePath.backslash",
-          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')",
-          "group": "6_copypath",
-          "order": 60
-        }
-      ],
-      "editor/title": [
-        {
-          "command": "vsc-smith.markdown.openPreview",
-          "when": "config.vsc-smith.markdown.enabled && editorLangId == markdown",
-          "group": "navigation@-99"
-        }
-      ],
-      "editor/title/context": [
-        {
-          "command": "vsc-smith.copyRelativePath.slash",
-          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/')) && resourceScheme != untitled",
-          "group": "1_cutcopypaste",
-          "order": 60
-        },
-        {
-          "command": "vsc-smith.copyRelativePath.backslash",
-          "when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/') && resourceScheme != untitled",
-          "group": "1_cutcopypaste",
-          "order": 60
-        }
-      ],
-      "view/title": [
-        {
-          "command": "vsc-smith.gitGraph.refresh",
-          "when": "view == vsc-smith.gitGraph",
-          "group": "navigation"
-        }
-      ],
-      "webview/context": [
-        {
-          "command": "vsc-smith.gitGraph.openDiff",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
-          "group": "1_commit@1"
-        },
-        {
-          "command": "vsc-smith.gitGraph.createBranch",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
-          "group": "1_commit@2"
-        },
-        {
-          "command": "vsc-smith.gitGraph.createBranch",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
-          "group": "1_commit@2"
-        },
-        {
-          "command": "vsc-smith.gitGraph.openDiff",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
-          "group": "1_commit@1"
-        },
-        {
-          "command": "vsc-smith.gitGraph.renameBranch",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && branchKind == 'local'",
-          "group": "2_branch@1"
-        },
-        {
-          "command": "vsc-smith.gitGraph.deleteBranch",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && branchKind == 'local' && !isCurrent",
-          "group": "2_branch@2"
-        },
-        {
-          "command": "vsc-smith.gitGraph.mergeBranch",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
-          "group": "3_integrate@1"
-        },
-        {
-          "command": "vsc-smith.gitGraph.rebaseBranch",
-          "when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
-          "group": "3_integrate@2"
-        }
-      ]
-    },
-    "keybindings": [
-      {
-        "key": "enter",
-        "command": "vsc-smith.markdown.onEnter",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio"
-      },
-      {
-        "key": "tab",
-        "command": "vsc-smith.markdown.onTab",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus && !inlineEditIsVisible"
-      },
-      {
-        "key": "shift+tab",
-        "command": "vsc-smith.markdown.onShiftTab",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus"
-      },
-      {
-        "key": "alt+c",
-        "command": "vsc-smith.mdEdit.toggleTask",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !vsc-smith.mdEdit.yieldToMaio"
-      },
-      {
-        "key": "ctrl+v",
-        "mac": "cmd+v",
-        "command": "vsc-smith.mdEdit.pasteUrl",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && editorHasSelection && !vsc-smith.mdEdit.yieldToMaio"
-      },
-      {
-        "key": "alt+up",
-        "command": "vsc-smith.mdEdit.moveItemUp",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
-      },
-      {
-        "key": "alt+down",
-        "command": "vsc-smith.mdEdit.moveItemDown",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
-      }
-    ],
-    "viewsContainers": {
-      "panel": [
-        {
-          "id": "vsc-smith-gitGraph",
-          "title": "Git Graph (Smith)",
-          "icon": "media/icons/gitGraph.svg"
-        }
-      ]
-    },
-    "views": {
-      "vsc-smith-gitGraph": [
-        {
-          "type": "webview",
-          "id": "vsc-smith.gitGraph",
-          "name": "Git Graph",
-          "when": "vsc-smith.gitGraph.active"
-        }
-      ]
-    }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && npm run lint && node esbuild.js",
-    "watch": "npm-run-all -p watch:*",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "npm run check-types && npm run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "format": "prettier --write src",
-    "format:check": "prettier --check src",
-    "test": "vscode-test"
-  },
-  "devDependencies": {
-    "@types/markdown-it": "^14.2.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "24.x",
-    "@types/vscode": "^1.70.0",
-    "@vscode/test-cli": "^0.0.15",
-    "@vscode/test-electron": "^3.0.0",
-    "@vscode/vsce": "^4.0.0",
-    "esbuild": "^0.28.1",
-    "eslint": "^10.5.0",
-    "markdown-it": "^14.3.2",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^3.9.9",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.1"
-  },
-  "overrides": {
-    "diff": "^8.0.4",
-    "serialize-javascript": "^7.0.6"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/heppocogne/vsc-smith.git"
-  },
-  "dependencies": {
-    "mermaid": "^12.1.0"
-  }
+	"name": "vsc-smith",
+	"displayName": "VSCode Smith",
+	"description": "雑多な拡張機能集",
+	"publisher": "heppocogne",
+	"version": "0.1.0",
+	"engines": {
+		"vscode": "^1.70.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onStartupFinished",
+		"onCommand:vsc-smith.copyRelativePath.slash",
+		"onCommand:vsc-smith.copyRelativePath.backslash",
+		"onCommand:vsc-smith.markdown.onEnter",
+		"onCommand:vsc-smith.markdown.onTab",
+		"onCommand:vsc-smith.markdown.onShiftTab",
+		"onCommand:vsc-smith.markdown.pasteAsTable",
+		"onCommand:vsc-smith.markdown.openPreview",
+		"onCommand:vsc-smith.mdEdit.toggleTask",
+		"onCommand:vsc-smith.mdEdit.pasteUrl",
+		"onCommand:vsc-smith.mdEdit.insertDateTime",
+		"onCommand:vsc-smith.mdEdit.toggleBold",
+		"onCommand:vsc-smith.mdEdit.toggleItalic",
+		"onCommand:vsc-smith.mdEdit.toggleStrikethrough",
+		"onCommand:vsc-smith.mdEdit.toggleCode",
+		"onCommand:vsc-smith.mdEdit.insertFootnote",
+		"onCommand:vsc-smith.mdEdit.moveItemUp",
+		"onCommand:vsc-smith.mdEdit.moveItemDown",
+		"onCommand:vsc-smith.mdEdit.duplicateItem",
+		"onCommand:vsc-smith.mdEdit.renumberList",
+		"onView:vsc-smith.gitGraph",
+		"onCommand:vsc-smith.gitGraph.show",
+		"onCommand:vsc-smith.gitGraph.refresh",
+		"onCommand:vsc-smith.gitGraph.openDiff",
+		"onCommand:vsc-smith.gitGraph.createBranch",
+		"onCommand:vsc-smith.gitGraph.renameBranch",
+		"onCommand:vsc-smith.gitGraph.deleteBranch",
+		"onCommand:vsc-smith.gitGraph.mergeBranch",
+		"onCommand:vsc-smith.gitGraph.rebaseBranch"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"configuration": [
+			{
+				"title": "File Size",
+				"properties": {
+					"vsc-smith.fileSize.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "file-size: ファイルサイズ表示機能を有効にする"
+					},
+					"vsc-smith.fileSize.statusBar": {
+						"type": "boolean",
+						"default": true,
+						"description": "file-size: アクティブなファイルのサイズをステータスバーに表示する"
+					},
+					"vsc-smith.fileSize.statusBarAlignment": {
+						"type": "string",
+						"enum": [
+							"left",
+							"right"
+						],
+						"default": "left",
+						"description": "file-size: ステータスバー上の表示位置 (右側はテキストファイルで行/列・エンコーディングなどの項目と並ぶため、既定は左)"
+					},
+					"vsc-smith.fileSize.explorerTooltip": {
+						"type": "boolean",
+						"default": true,
+						"description": "file-size: エクスプローラーでファイルにホバーした時のツールチップにサイズを表示する"
+					}
+				}
+			},
+			{
+				"title": "Copy Path",
+				"properties": {
+					"vsc-smith.copyPath.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "copy-path: 相対パスを、標準の \"Copy Relative Path\" (explorer.copyRelativePathSeparator) とは逆の区切り文字でコピーするコマンドを有効にする (標準が / なら \\ 区切り、\\ なら / 区切り)"
+					}
+				}
+			},
+			{
+				"title": "Markdown",
+				"properties": {
+					"vsc-smith.markdown.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "markdown: Enter で箇条書き・番号付きリスト・タスクリスト・引用を継続し、Tab / Shift+Tab でリスト項目をインデント/アウトデントする"
+					},
+					"vsc-smith.markdown.pasteTable.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "markdown: スプレッドシートからコピーしたタブ区切りテキストを貼り付けたとき、Markdown のテーブルとして貼り付けるか、そのまま (タブ区切り) 貼り付けるかを、貼り付け後に表示される選択肢 (VS Code 1.87 以降) から切り替えられるようにする。それ以前の VS Code では「Paste as Markdown Table」コマンドでテーブルとして貼り付ける"
+					},
+					"vsc-smith.markdown.pasteTable.default": {
+						"type": "string",
+						"enum": [
+							"table",
+							"text"
+						],
+						"default": "text",
+						"description": "markdown: タブ区切りテキストを貼り付けたとき最初に挿入する形式 (table: テーブルの書式, text: そのまま)。貼り付け直後の選択肢 (Ctrl+. など) でもう一方に切り替えられる"
+					},
+					"vsc-smith.markdown.yieldToMarkdownAllInOne": {
+						"type": "boolean",
+						"default": true,
+						"description": "markdown: Markdown All in One が有効なときは、同等の機能を持つそちらに Enter / Tab / Shift+Tab を譲る (Markdown All in One 側でリスト継続を無効にしている場合は false にする)"
+					}
+				}
+			},
+			{
+				"title": "Markdown Edit",
+				"properties": {
+					"vsc-smith.mdEdit.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "mdEdit: Markdown の編集コマンド (タスクのトグル、URL の貼り付け、日時の挿入、太字・斜体などのトグル、脚注の挿入、リスト項目の移動・複製・番号の振り直し) を有効にする"
+					},
+					"vsc-smith.mdEdit.dateTimeFormat": {
+						"type": "string",
+						"default": "YYYY-MM-DD HH:mm",
+						"description": "mdEdit: 「日時を挿入」の書式。YYYY, YY, MM, M, DD, D, HH, H, mm, ss が使え、[...] で囲んだ部分はそのまま出力する"
+					},
+					"vsc-smith.mdEdit.yieldToMarkdownAllInOne": {
+						"type": "boolean",
+						"default": true,
+						"description": "mdEdit: Markdown All in One が有効なときは、同等の機能を持つそちらにキーバインド (タスクのトグル、URL の貼り付け、リスト項目の移動) を譲る。コマンドは残る"
+					}
+				}
+			},
+			{
+				"title": "Python Format",
+				"properties": {
+					"vsc-smith.pythonFormat.enabled": {
+						"type": "boolean",
+						"default": false,
+						"description": "pythonFormat: Python のフォーマッター (Black 風の簡易版) を登録する。使うには Python 3.9 以降が必要で、`editor.defaultFormatter` に `heppocogne.vsc-smith` を指定する"
+					},
+					"vsc-smith.pythonFormat.pythonPath": {
+						"type": "string",
+						"default": "",
+						"scope": "machine-overridable",
+						"description": "pythonFormat: フォーマッターの実行に使う Python (空の場合は Windows では python、それ以外では python3)"
+					}
+				}
+			},
+			{
+				"title": "GFM",
+				"properties": {
+					"vsc-smith.gfm.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "gfm: Markdown プレビューでタスクリストのチェックボックス、アラート (> [!NOTE] など)、脚注 ([^1]) を表示する"
+					}
+				}
+			},
+			{
+				"title": "Mermaid",
+				"properties": {
+					"vsc-smith.mermaid.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "mermaid: Markdown プレビューで mermaid のコードブロックを図として表示する"
+					},
+					"vsc-smith.mermaid.yieldToOtherExtensions": {
+						"type": "boolean",
+						"default": true,
+						"description": "mermaid: VS Code 標準の Mermaid 表示 (1.121 以降の Mermaid Markdown Features) か Markdown Preview Mermaid Support が有効なときは、そちらに表示を譲る"
+					}
+				}
+			},
+			{
+				"title": "Copy Button",
+				"properties": {
+					"vsc-smith.copyButton.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "copyButton: Markdown プレビューのコードブロックにコピーボタンを表示する"
+					},
+					"vsc-smith.copyButton.position": {
+						"type": "string",
+						"enum": [
+							"top-right",
+							"bottom-right"
+						],
+						"enumDescriptions": [
+							"右上",
+							"右下"
+						],
+						"default": "top-right",
+						"description": "copyButton: コピーボタンの位置"
+					}
+				}
+			},
+			{
+				"title": "Git Graph",
+				"properties": {
+					"vsc-smith.gitGraph.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "gitGraph: コミットグラフ (パネルの Git Graph ビュー) を有効にする。コミットの右クリックで差分の表示・ブランチ作成、ブランチの右クリックで名前変更・削除・マージ・リベースができる"
+					},
+					"vsc-smith.gitGraph.yieldToOtherExtensions": {
+						"type": "boolean",
+						"default": true,
+						"description": "gitGraph: Git Graph (mhutchie.git-graph) か GitLens (eamodio.gitlens) が有効なときは、そちらに譲って表示しない"
+					}
+				}
+			}
+		],
+		"markdown.markdownItPlugins": true,
+		"markdown.previewStyles": [
+			"./media/gfm.css",
+			"./media/mermaid.css",
+			"./media/copyButton.css"
+		],
+		"markdown.previewScripts": [
+			"./media/mermaid.js",
+			"./media/copyButton.js"
+		],
+		"commands": [
+			{
+				"command": "vsc-smith.copyRelativePath.slash",
+				"title": "Copy Relative Path (/)",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.copyRelativePath.backslash",
+				"title": "Copy Relative Path (\\)",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.markdown.pasteAsTable",
+				"title": "Paste as Markdown Table",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.markdown.openPreview",
+				"title": "Open Preview",
+				"category": "VSCodeSmith",
+				"icon": {
+					"light": "media/icons/preview-light.svg",
+					"dark": "media/icons/preview-dark.svg"
+				}
+			},
+			{
+				"command": "vsc-smith.mdEdit.toggleTask",
+				"title": "Toggle Task",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.pasteUrl",
+				"title": "Paste URL as Link",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.insertDateTime",
+				"title": "Insert Date and Time",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.toggleBold",
+				"title": "Toggle Bold",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.toggleItalic",
+				"title": "Toggle Italic",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.toggleStrikethrough",
+				"title": "Toggle Strikethrough",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.toggleCode",
+				"title": "Toggle Inline Code",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.insertFootnote",
+				"title": "Insert Footnote",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.moveItemUp",
+				"title": "Move List Item Up",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.moveItemDown",
+				"title": "Move List Item Down",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.duplicateItem",
+				"title": "Duplicate List Item",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.mdEdit.renumberList",
+				"title": "Renumber Ordered List",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.show",
+				"title": "Show Git Graph",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.refresh",
+				"title": "Refresh Git Graph",
+				"category": "VSCodeSmith",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "vsc-smith.gitGraph.openDiff",
+				"title": "Show Diff",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.createBranch",
+				"title": "Create Branch Here",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.renameBranch",
+				"title": "Rename Branch",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.deleteBranch",
+				"title": "Delete Branch",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.mergeBranch",
+				"title": "Merge into Current Branch",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.rebaseBranch",
+				"title": "Rebase Current Branch onto This",
+				"category": "VSCodeSmith"
+			}
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "vsc-smith.markdown.openPreview",
+					"when": "config.vsc-smith.markdown.enabled && editorLangId == markdown"
+				},
+				{
+					"command": "vsc-smith.markdown.pasteAsTable",
+					"when": "config.vsc-smith.markdown.enabled && config.vsc-smith.markdown.pasteTable.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.toggleTask",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.pasteUrl",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.insertDateTime",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.toggleBold",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.toggleItalic",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.toggleStrikethrough",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.toggleCode",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.insertFootnote",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.moveItemUp",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.moveItemDown",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.duplicateItem",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.mdEdit.renumberList",
+					"when": "config.vsc-smith.mdEdit.enabled && editorLangId == markdown && !editorReadonly"
+				},
+				{
+					"command": "vsc-smith.copyRelativePath.slash",
+					"when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))"
+				},
+				{
+					"command": "vsc-smith.copyRelativePath.backslash",
+					"when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')"
+				},
+				{
+					"command": "vsc-smith.gitGraph.show",
+					"when": "vsc-smith.gitGraph.active"
+				},
+				{
+					"command": "vsc-smith.gitGraph.refresh",
+					"when": "vsc-smith.gitGraph.active"
+				},
+				{
+					"command": "vsc-smith.gitGraph.openDiff",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createBranch",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.renameBranch",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.deleteBranch",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.mergeBranch",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.rebaseBranch",
+					"when": "false"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "vsc-smith.copyRelativePath.slash",
+					"when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/'))",
+					"group": "6_copypath",
+					"order": 60
+				},
+				{
+					"command": "vsc-smith.copyRelativePath.backslash",
+					"when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/')",
+					"group": "6_copypath",
+					"order": 60
+				}
+			],
+			"editor/title": [
+				{
+					"command": "vsc-smith.markdown.openPreview",
+					"when": "config.vsc-smith.markdown.enabled && editorLangId == markdown",
+					"group": "navigation@-99"
+				}
+			],
+			"editor/title/context": [
+				{
+					"command": "vsc-smith.copyRelativePath.slash",
+					"when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && isWindows) || (config.explorer.copyRelativePathSeparator != auto && config.explorer.copyRelativePathSeparator != '/')) && resourceScheme != untitled",
+					"group": "1_cutcopypaste",
+					"order": 60
+				},
+				{
+					"command": "vsc-smith.copyRelativePath.backslash",
+					"when": "config.vsc-smith.copyPath.enabled && ((config.explorer.copyRelativePathSeparator == auto && !isWindows) || config.explorer.copyRelativePathSeparator == '/') && resourceScheme != untitled",
+					"group": "1_cutcopypaste",
+					"order": 60
+				}
+			],
+			"view/title": [
+				{
+					"command": "vsc-smith.gitGraph.refresh",
+					"when": "view == vsc-smith.gitGraph",
+					"group": "navigation"
+				}
+			],
+			"webview/context": [
+				{
+					"command": "vsc-smith.gitGraph.openDiff",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+					"group": "1_commit@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createBranch",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+					"group": "1_commit@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createBranch",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "1_commit@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.openDiff",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "1_commit@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.renameBranch",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && branchKind == 'local'",
+					"group": "2_branch@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.deleteBranch",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && branchKind == 'local' && !isCurrent",
+					"group": "2_branch@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.mergeBranch",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
+					"group": "3_integrate@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.rebaseBranch",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
+					"group": "3_integrate@2"
+				}
+			]
+		},
+		"keybindings": [
+			{
+				"key": "enter",
+				"command": "vsc-smith.markdown.onEnter",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio"
+			},
+			{
+				"key": "tab",
+				"command": "vsc-smith.markdown.onTab",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus && !inlineEditIsVisible"
+			},
+			{
+				"key": "shift+tab",
+				"command": "vsc-smith.markdown.onShiftTab",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.markdown.enabled && !editorHasSelection && !editorHasMultipleSelections && !suggestWidgetVisible && !inlineSuggestionVisible && !inSnippetMode && !vsc-smith.markdown.yieldToMaio && !editorTabMovesFocus"
+			},
+			{
+				"key": "alt+c",
+				"command": "vsc-smith.mdEdit.toggleTask",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !vsc-smith.mdEdit.yieldToMaio"
+			},
+			{
+				"key": "ctrl+v",
+				"mac": "cmd+v",
+				"command": "vsc-smith.mdEdit.pasteUrl",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && editorHasSelection && !vsc-smith.mdEdit.yieldToMaio"
+			},
+			{
+				"key": "alt+up",
+				"command": "vsc-smith.mdEdit.moveItemUp",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
+			},
+			{
+				"key": "alt+down",
+				"command": "vsc-smith.mdEdit.moveItemDown",
+				"when": "editorTextFocus && !editorReadonly && editorLangId == markdown && config.vsc-smith.mdEdit.enabled && !editorHasMultipleSelections && !vsc-smith.mdEdit.yieldToMaio"
+			}
+		],
+		"viewsContainers": {
+			"panel": [
+				{
+					"id": "vsc-smith-gitGraph",
+					"title": "Git Graph (Smith)",
+					"icon": "media/icons/gitGraph.svg"
+				}
+			]
+		},
+		"views": {
+			"vsc-smith-gitGraph": [
+				{
+					"type": "webview",
+					"id": "vsc-smith.gitGraph",
+					"name": "Git Graph",
+					"when": "vsc-smith.gitGraph.active"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run package",
+		"compile": "npm run check-types && npm run lint && node esbuild.js",
+		"watch": "npm-run-all -p watch:*",
+		"watch:esbuild": "node esbuild.js --watch",
+		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+		"package": "npm run check-types && npm run lint && node esbuild.js --production",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p . -w --outDir out",
+		"pretest": "npm run compile-tests && npm run compile && npm run lint",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint src",
+		"format": "prettier --write src",
+		"format:check": "prettier --check src",
+		"test": "vscode-test"
+	},
+	"devDependencies": {
+		"@types/markdown-it": "^14.2.0",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "24.x",
+		"@types/vscode": "^1.70.0",
+		"@vscode/test-cli": "^0.0.15",
+		"@vscode/test-electron": "^3.0.0",
+		"@vscode/vsce": "^4.0.0",
+		"esbuild": "^0.28.1",
+		"eslint": "^10.5.0",
+		"markdown-it": "^14.3.2",
+		"npm-run-all": "^4.1.5",
+		"prettier": "^3.9.9",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.61.1"
+	},
+	"overrides": {
+		"diff": "^8.0.4",
+		"serialize-javascript": "^7.0.6"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/heppocogne/vsc-smith.git"
+	},
+	"dependencies": {
+		"mermaid": "^12.1.0"
+	}
 }

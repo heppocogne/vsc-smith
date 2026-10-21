@@ -84,6 +84,7 @@ VS Code 1.121 以降は標準で Mermaid を表示できるので、既定では
 
 コミットグラフを、パネルの「Git Graph (Smith)」ビューに表示します (`git log --all --date-order` 相当、300 件ずつ「Load more」で追加)。ワークスペースの最初の git リポジトリを対象にし、ブランチの作成・削除・コミットなどでグラフが更新されます。
 
+- 複数行のコミットメッセージは、行には 1 行目だけを表示し、末尾の `▸` が付いたコミットをクリックすると残りの行を展開します (もう一度クリックで折りたたみ)。
 - コミットを右クリック: `Show Diff` (変更ファイルを選んで親コミットとの差分を開く。ダブルクリックでも可)、`Create Branch Here`
 - ブランチ (ラベル) を右クリック: `Rename Branch`、`Delete Branch` (ローカルのみ)、`Merge into Current Branch`、`Rebase Current Branch onto This`
 

@@ -12,10 +12,28 @@
 	const moreButton = /** @type {HTMLButtonElement} */ (document.getElementById('more'));
 
 	moreButton.addEventListener('click', () => vscode.postMessage({ type: 'loadMore' }));
-	list.addEventListener('mousedown', event => {
-		const row = /** @type {HTMLElement} */ (event.target).closest('.row');
-		if (row) {
-			select(row);
+	/** Hashes of the commits whose message body is open; kept across redraws. */
+	const expanded = new Set();
+	list.addEventListener('click', event => {
+		const row = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (event.target).closest('.row'));
+		if (!row) {
+			return;
+		}
+		select(row);
+		const hash = /** @type {string} */ (row.dataset.hash);
+		if (row.classList.contains('has-body')) {
+			const open = !expanded.has(hash);
+			if (open) {
+				expanded.add(hash);
+			} else {
+				expanded.delete(hash);
+			}
+			row.classList.toggle('expanded', open);
+			if (open) {
+				showBody(row, lastData);
+			} else {
+				row.nextElementSibling?.remove();
+			}
 		}
 	});
 	list.addEventListener('dblclick', event => {
@@ -81,7 +99,47 @@
 		element.setAttribute('data-vscode-context', JSON.stringify({ preventDefaultContextMenuItems: true, ...context }));
 	}
 
+	let lastData;
+
+	/** Inserts the message body below `row`, with the lines that continue past this commit running through it. */
+	function showBody(row, data) {
+		const index = Number(row.dataset.index);
+		const commit = data.commits[index];
+		const width = Math.max(data.layout.laneCount, 1) * LANE_WIDTH;
+		const details = document.createElement('div');
+		details.className = 'details';
+		details.dataset.hash = commit.hash;
+		setContext(details, { webviewSection: 'commit', hash: commit.hash });
+
+		const gutter = document.createElement('div');
+		gutter.className = 'gutter';
+		gutter.style.width = `${width}px`;
+		const lines = svg('svg', { viewBox: `0 0 ${width} 1`, preserveAspectRatio: 'none' });
+		for (const s of data.layout.rows[index].segments) {
+			if (s.toY === 1) {
+				lines.appendChild(
+					svg('line', {
+						x1: x(s.to),
+						x2: x(s.to),
+						y1: 0,
+						y2: 1,
+						stroke: color(s.color),
+						'stroke-width': 2,
+						'vector-effect': 'non-scaling-stroke',
+					}),
+				);
+			}
+		}
+		gutter.appendChild(lines);
+		const text = document.createElement('div');
+		text.className = 'body';
+		text.textContent = commit.body;
+		details.append(gutter, text);
+		row.after(details);
+	}
+
 	function render(data) {
+		lastData = data;
 		const selected = list.querySelector('.selected');
 		const selectedHash = selected ? /** @type {HTMLElement} */ (selected).dataset.hash : undefined;
 		list.textContent = '';
@@ -90,8 +148,14 @@
 		const fragment = document.createDocumentFragment();
 		data.commits.forEach((commit, index) => {
 			const row = document.createElement('div');
-			row.className = 'row' + (commit.hash === selectedHash ? ' selected' : '');
+			const open = commit.body !== '' && expanded.has(commit.hash);
+			row.className =
+				'row' +
+				(commit.hash === selectedHash ? ' selected' : '') +
+				(commit.body ? ' has-body' : '') +
+				(open ? ' expanded' : '');
 			row.dataset.hash = commit.hash;
+			row.dataset.index = String(index);
 			setContext(row, { webviewSection: 'commit', hash: commit.hash });
 			row.title = `${commit.hash}\n${commit.author}\n${commit.subject}`;
 
@@ -118,6 +182,12 @@
 			subject.className = 'subject';
 			subject.textContent = commit.subject;
 			summary.appendChild(subject);
+			if (commit.body) {
+				const marker = document.createElement('span');
+				marker.className = 'marker';
+				marker.title = 'Click to show the full message';
+				summary.appendChild(marker);
+			}
 			row.appendChild(summary);
 
 			const meta = document.createElement('div');
@@ -134,6 +204,9 @@
 			}
 			row.appendChild(meta);
 			fragment.appendChild(row);
+			if (open) {
+				showBody(row, data);
+			}
 		});
 		list.appendChild(fragment);
 	}

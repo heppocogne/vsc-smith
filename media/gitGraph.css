@@ -87,3 +87,35 @@ body {
 #more {
 	margin: 8px 12px;
 }
+.row.has-body {
+	cursor: pointer;
+}
+.marker::before {
+	content: '▸';
+	color: var(--vscode-descriptionForeground);
+}
+.row.expanded .marker::before {
+	content: '▾';
+}
+.details {
+	display: flex;
+}
+.details .gutter {
+	flex: none;
+	position: relative;
+}
+.details .gutter svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+.details .body {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 4px 12px 8px 0;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	user-select: text;
+	color: var(--vscode-descriptionForeground);
+}

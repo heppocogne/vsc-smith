@@ -17,6 +17,8 @@ export interface LogEntry {
 	/** Author date in seconds since the epoch. */
 	time: number;
 	subject: string;
+	/** Message after the subject line, without surrounding blank lines. */
+	body: string;
 	refs: GitRef[];
 	/** True when HEAD is detached at this commit. */
 	head: boolean;
@@ -32,7 +34,7 @@ export interface ChangedFile {
 
 const FIELD = '\x1f';
 const RECORD = '\x1e';
-export const LOG_FORMAT = ['%H', '%P', '%an', '%at', '%D', '%s'].join(FIELD) + RECORD;
+export const LOG_FORMAT = ['%H', '%P', '%an', '%at', '%D', '%s', '%b'].join(FIELD) + RECORD;
 
 export class GitError extends Error {}
 
@@ -106,14 +108,15 @@ export function parseLog(output: string): LogEntry[] {
 		if (!text) {
 			continue;
 		}
-		const [hash, parents, author, time, decoration, ...subject] = text.split(FIELD);
+		const [hash, parents, author, time, decoration, subject, ...body] = text.split(FIELD);
 		const { refs, head } = parseDecoration(decoration ?? '');
 		entries.push({
 			hash,
 			parents: parents ? parents.split(' ') : [],
 			author: author ?? '',
 			time: Number(time) || 0,
-			subject: subject.join(FIELD),
+			subject: subject ?? '',
+			body: body.join(FIELD).trim(),
 			refs,
 			head,
 		});

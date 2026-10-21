@@ -53,12 +53,14 @@ suite('gitGraph', () => {
 
 	test('parseLog', () => {
 		const out =
-			'aaa\x1fbbb ccc\x1fAlice\x1f100\x1fHEAD -> refs/heads/main\x1fMerge\x1fa\x1e\n' +
-			'bbb\x1f\x1fBob\x1f50\x1f\x1fRoot\x1e\n';
+			'aaa\x1fbbb ccc\x1fAlice\x1f100\x1fHEAD -> refs/heads/main\x1fMerge\x1fFirst\n\nSecond\n\x1e\n' +
+			'bbb\x1f\x1fBob\x1f50\x1f\x1fRoot\x1f\x1e\n';
 		const entries = parseLog(out);
 		assert.strictEqual(entries.length, 2);
 		assert.deepStrictEqual(entries[0].parents, ['bbb', 'ccc']);
-		assert.strictEqual(entries[0].subject, 'Merge\x1fa');
+		assert.strictEqual(entries[0].subject, 'Merge');
+		assert.strictEqual(entries[0].body, 'First\n\nSecond');
+		assert.strictEqual(entries[1].body, '');
 		assert.strictEqual(entries[0].refs[0].current, true);
 		assert.deepStrictEqual(entries[1].parents, []);
 		assert.strictEqual(entries[1].time, 50);

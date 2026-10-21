@@ -111,7 +111,8 @@ export class PythonFormatProvider
 	}
 
 	private async format(document: vscode.TextDocument, lines: LineRange[]): Promise<vscode.TextEdit[]> {
-		const configured = vscode.workspace.getConfiguration(SECTION, document.uri).get<string>('pythonPath', '').trim();
+		// Only the user-level value: a workspace's settings.json must not choose which executable we run.
+		const configured = (vscode.workspace.getConfiguration(SECTION).inspect<string>('pythonPath')?.globalValue ?? '').trim();
 		const original = document.getText();
 		const formatted = await formatPython(configured || defaultPython(), this.extensionPath, original, lines);
 		const edit = minimalEdit(original, formatted);

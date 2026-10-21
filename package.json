@@ -42,6 +42,16 @@
 		"onCommand:vsc-smith.gitGraph.rebaseBranch"
 	],
 	"main": "./dist/extension.js",
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"supported": "limited",
+			"description": "信頼されていないワークスペースでは、Python フォーマッターの設定 (有効化と Python のパス) をワークスペースから読み込まない",
+			"restrictedConfigurations": [
+				"vsc-smith.pythonFormat.pythonPath",
+				"vsc-smith.pythonFormat.enabled"
+			]
+		}
+	},
 	"contributes": {
 		"configuration": [
 			{
@@ -163,8 +173,8 @@
 					"vsc-smith.pythonFormat.pythonPath": {
 						"type": "string",
 						"default": "",
-						"scope": "machine-overridable",
-						"description": "pythonFormat: フォーマッターの実行に使う Python (空の場合は Windows では python、それ以外では python3)"
+						"scope": "machine",
+						"description": "pythonFormat: フォーマッターの実行に使う Python。セキュリティ上、ユーザー設定のみ有効でワークスペース設定は無視される (空の場合は Windows では python、それ以外では python3)"
 					}
 				}
 			},

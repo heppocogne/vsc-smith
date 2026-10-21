@@ -137,7 +137,7 @@ python -m vsc_smith_pyfmt --lines 10-20 --lines 40 path/to/file.py # 触れた�
 | `vsc-smith.gitGraph.enabled`                 | `true` | コミットグラフを有効にする                        |
 | `vsc-smith.gitGraph.yieldToOtherExtensions`  | `true` | Git Graph / GitLens が有効なときはそちらに譲る    |
 | `vsc-smith.pythonFormat.enabled`             | `false` | Python のフォーマッターを有効にする               |
-| `vsc-smith.pythonFormat.pythonPath`          | `""`   | フォーマッターの実行に使う Python (空なら `python3` / Windows は `python`) |
+| `vsc-smith.pythonFormat.pythonPath`          | `""`   | フォーマッターの実行に使う Python (空なら `python3` / Windows は `python`)。ユーザー設定のみ有効で、ワークスペース設定は無視される |
 | `vsc-smith.gfm.enabled`                      | `true` | プレビューでタスクリスト・アラート・脚注を表示する      |
 | `vsc-smith.mermaid.enabled`                  | `true` | プレビューで mermaid のコードブロックを図にする   |
 | `vsc-smith.mermaid.yieldToOtherExtensions`   | `true` | 標準や他の拡張の Mermaid 表示があればそちらに譲る |

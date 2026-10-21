@@ -8,6 +8,7 @@ import { registerMarkdown } from './features/markdown';
 import { registerMdEdit } from './features/mdEdit';
 import { registerMermaid } from './features/mermaid';
 import { registerPythonFormat } from './features/pythonFormat';
+import { registerTerminalRestore } from './features/terminalRestore';
 import { MarkdownItExtension } from './util/markdownPreview';
 
 export function activate(context: vscode.ExtensionContext): MarkdownItExtension {
@@ -17,6 +18,7 @@ export function activate(context: vscode.ExtensionContext): MarkdownItExtension 
 	registerMdEdit(context);
 	registerPythonFormat(context);
 	registerGitGraph(context);
+	registerTerminalRestore(context);
 	const plugins = [registerGfm(context), registerMermaid(context), registerCopyButton(context)];
 	return {
 		extendMarkdownIt: md => plugins.reduce((result, plugin) => plugin.extendMarkdownIt(result), md),

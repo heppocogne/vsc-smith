@@ -74,6 +74,26 @@
 				}
 			},
 			{
+				"title": "Terminal Restore",
+				"properties": {
+					"vsc-smith.terminalRestore.enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "terminal-restore: ワークスペースを開き直したときに、前回開いていたターミナル (名前・作業ディレクトリ・環境変数) を復元する"
+					},
+					"vsc-smith.terminalRestore.restoreEnv": {
+						"type": "boolean",
+						"default": true,
+						"description": "terminal-restore: ターミナル作成時に指定された環境変数も保存・復元する (ワークスペースの保存領域に平文で保存される)"
+					},
+					"vsc-smith.terminalRestore.skipIfRestoredByVSCode": {
+						"type": "boolean",
+						"default": true,
+						"description": "terminal-restore: VS Code 標準のターミナル復元 (terminal.integrated.enablePersistentSessions) で既にターミナルがあるときは、重複を避けるために復元しない"
+					}
+				}
+			},
+			{
 				"title": "Copy Path",
 				"properties": {
 					"vsc-smith.copyPath.enabled": {

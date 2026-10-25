@@ -44,6 +44,13 @@
 	});
 
 	/** @param {Element} row */
+	/** Formats epoch seconds as `YYYY/MM/DD HH:mm:ss` (24-hour, local time). */
+	function formatDate(seconds) {
+		const d = new Date(seconds * 1000);
+		const p = (/** @type {number} */ n) => String(n).padStart(2, '0');
+		return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+	}
+
 	function select(row) {
 		for (const old of list.querySelectorAll('.selected')) {
 			old.classList.remove('selected');
@@ -194,7 +201,7 @@
 			meta.className = 'meta';
 			for (const [name, text] of [
 				['author', commit.author],
-				['date', new Date(commit.time * 1000).toLocaleString()],
+				['date', formatDate(commit.time)],
 				['hash', commit.hash.slice(0, 7)],
 			]) {
 				const cell = document.createElement('span');

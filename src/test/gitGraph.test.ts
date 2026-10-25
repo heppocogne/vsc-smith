@@ -176,5 +176,14 @@ suite('gitGraph', () => {
 			const root = log[log.length - 1];
 			assert.deepStrictEqual(await readChangedFiles(dir, root.hash, undefined), [{ status: 'A', path: 'a.txt' }]);
 		});
+
+		test('ignores commits reachable only from non-branch refs such as refs/jj/keep', async () => {
+			const tree = (await run('rev-parse', 'HEAD^{tree}')).trim();
+			const orphan = (await run('commit-tree', tree, '-m', 'jj orphan')).trim();
+			await run('update-ref', 'refs/jj/keep/orphan', orphan);
+			const log = await readLog(dir, 50);
+			assert.ok(!log.some(c => c.hash === orphan));
+			assert.strictEqual(log.length, 4);
+		});
 	});
 });

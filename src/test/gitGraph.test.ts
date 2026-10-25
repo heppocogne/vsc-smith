@@ -126,6 +126,19 @@ suite('gitGraph', () => {
 			assert.strictEqual(layout.rows[0].segments[0].toY, 1);
 		});
 
+		test('the current branch keeps one color even when another branch tip comes first in the log', () => {
+			// f (feature tip, based on m2) is listed before main's own tip m3.
+			const layout = layoutGraph([
+				{ hash: 'f', parents: ['m2'] },
+				{ hash: 'm3', parents: ['m2'], refs: [{ kind: 'local', current: true }] },
+				{ hash: 'm2', parents: ['m1'] },
+				{ hash: 'm1', parents: [] },
+			]);
+			const colors = layout.rows.slice(1).map(r => r.color);
+			assert.strictEqual(new Set(colors).size, 1);
+			assert.notStrictEqual(layout.rows[0].color, colors[0]);
+		});
+
 		test('independent roots', () => {
 			const layout = layoutGraph([
 				{ hash: 'a', parents: [] },

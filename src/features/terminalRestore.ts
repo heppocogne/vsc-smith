@@ -4,7 +4,7 @@ import { ToggleableFeature } from '../util/feature';
 const SECTION = 'vsc-smith.terminalRestore';
 const STATE_KEY = 'vsc-smith.terminalRestore.terminals';
 /** How long to wait for VS Code's own terminal revival before deciding whether to restore. */
-const STARTUP_DELAY_MS = 1500;
+const STARTUP_DELAY_MS = 3000;
 /** Closing the window disposes every terminal; writing late keeps that from emptying the saved list. */
 const SAVE_DELAY_MS = 1000;
 
@@ -80,12 +80,23 @@ export class TerminalTracker implements vscode.Disposable {
 
 	/** Restores the saved terminals, then starts tracking. Tracking starts afterwards so the saved list is not overwritten. */
 	async restoreSaved(skipIfRestoredByVSCode: boolean): Promise<void> {
-		await new Promise(resolve => setTimeout(resolve, STARTUP_DELAY_MS));
+		// On a window reload VS Code revives terminals asynchronously; they may not be in `window.terminals` yet
+		// when the timer fires, so also remember any terminal that opened while waiting.
+		let openedWhileWaiting = vscode.window.terminals.length > 0;
+		const listener = vscode.window.onDidOpenTerminal(() => {
+			openedWhileWaiting = true;
+		});
+		try {
+			await new Promise(resolve => setTimeout(resolve, STARTUP_DELAY_MS));
+		} finally {
+			listener.dispose();
+		}
 		if (this.disposed) {
 			return;
 		}
 		const saved = this.state.get<SavedTerminal[]>(STATE_KEY, []);
-		if (saved.length > 0 && !(skipIfRestoredByVSCode && vscode.window.terminals.length > 0)) {
+		const restoredByVSCode = openedWhileWaiting || vscode.window.terminals.length > 0;
+		if (saved.length > 0 && !(skipIfRestoredByVSCode && restoredByVSCode)) {
 			for (const entry of saved) {
 				const terminal = vscode.window.createTerminal({
 					name: entry.name,

@@ -23,7 +23,29 @@ const esbuildProblemMatcherPlugin = {
 	},
 };
 
+/** Scripts that run in webviews (src/webview), built to media/ where package.json and the views refer to them. */
+const webviewScripts = ['mermaid', 'copyButton', 'gitGraph'];
+
 async function main() {
+	const common = {
+		bundle: true,
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		logLevel: 'silent',
+		plugins: [
+			/* add to the end of plugins array */
+			esbuildProblemMatcherPlugin,
+		],
+	};
+	const webviewCtx = await esbuild.context({
+		...common,
+		entryPoints: webviewScripts.map(name => `src/webview/${name}.ts`),
+		format: 'iife',
+		platform: 'browser',
+		target: 'es2022',
+		outdir: 'media',
+	});
 	const ctx = await esbuild.context({
 		entryPoints: [
 			'src/extension.ts'
@@ -45,9 +67,12 @@ async function main() {
 	});
 	if (watch) {
 		await ctx.watch();
+		await webviewCtx.watch();
 	} else {
 		await ctx.rebuild();
+		await webviewCtx.rebuild();
 		await ctx.dispose();
+		await webviewCtx.dispose();
 	}
 }
 

@@ -1,5 +1,17 @@
-// @ts-check
-/* global acquireVsCodeApi */
+// Script of the Git Graph view. Runs in the webview, not in the extension. Built to media/gitGraph.js by esbuild.js.
+import type { LogEntry } from '../features/gitGraph/git';
+import type { GraphLayout, GraphRow } from '../features/gitGraph/graph';
+
+interface GraphData {
+	type: 'data';
+	commits: LogEntry[];
+	layout: GraphLayout;
+	hasMore: boolean;
+	message?: string;
+}
+
+declare function acquireVsCodeApi(): { postMessage(message: unknown): void };
+
 (function () {
 	const vscode = acquireVsCodeApi();
 	const ROW_HEIGHT = 24;
@@ -7,20 +19,22 @@
 	const COLORS = ['#4e9fe5', '#e5894e', '#6cc06c', '#c26be0', '#e5c94e', '#e55e7e', '#4ec9b0', '#9a9a9a'];
 	const SVG_NS = 'http://www.w3.org/2000/svg';
 
-	const list = /** @type {HTMLElement} */ (document.getElementById('list'));
-	const message = /** @type {HTMLElement} */ (document.getElementById('message'));
-	const moreButton = /** @type {HTMLButtonElement} */ (document.getElementById('more'));
+	const list = document.getElementById('list') as HTMLElement;
+	const message = document.getElementById('message') as HTMLElement;
+	const moreButton = document.getElementById('more') as HTMLButtonElement;
+
+	let lastData: GraphData | undefined;
 
 	moreButton.addEventListener('click', () => vscode.postMessage({ type: 'loadMore' }));
 	/** Hashes of the commits whose message body is open; kept across redraws. */
-	const expanded = new Set();
+	const expanded = new Set<string>();
 	list.addEventListener('click', event => {
-		const row = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (event.target).closest('.row'));
+		const row = (event.target as HTMLElement).closest<HTMLElement>('.row');
 		if (!row) {
 			return;
 		}
 		select(row);
-		const hash = /** @type {string} */ (row.dataset.hash);
+		const hash = row.dataset.hash as string;
 		if (row.classList.contains('has-body')) {
 			const open = !expanded.has(hash);
 			if (open) {
@@ -29,7 +43,7 @@
 				expanded.delete(hash);
 			}
 			row.classList.toggle('expanded', open);
-			if (open) {
+			if (open && lastData) {
 				showBody(row, lastData);
 			} else {
 				row.nextElementSibling?.remove();
@@ -37,32 +51,27 @@
 		}
 	});
 	list.addEventListener('dblclick', event => {
-		const row = /** @type {HTMLElement | null} */ (/** @type {HTMLElement} */ (event.target).closest('.row'));
+		const row = (event.target as HTMLElement).closest<HTMLElement>('.row');
 		if (row) {
 			vscode.postMessage({ type: 'openDiff', hash: row.dataset.hash });
 		}
 	});
 
-	/** @param {Element} row */
 	/** Formats epoch seconds as `YYYY/MM/DD HH:mm:ss` (24-hour, local time). */
-	function formatDate(seconds) {
+	function formatDate(seconds: number): string {
 		const d = new Date(seconds * 1000);
-		const p = (/** @type {number} */ n) => String(n).padStart(2, '0');
+		const p = (n: number) => String(n).padStart(2, '0');
 		return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 	}
 
-	function select(row) {
+	function select(row: Element): void {
 		for (const old of list.querySelectorAll('.selected')) {
 			old.classList.remove('selected');
 		}
 		row.classList.add('selected');
 	}
 
-	/**
-	 * @param {string} tag
-	 * @param {Record<string, string | number>} attrs
-	 */
-	function svg(tag, attrs) {
+	function svg(tag: string, attrs: Record<string, string | number>): SVGElement {
 		const element = document.createElementNS(SVG_NS, tag);
 		for (const [key, value] of Object.entries(attrs)) {
 			element.setAttribute(key, String(value));
@@ -70,11 +79,11 @@
 		return element;
 	}
 
-	const color = (/** @type {number} */ index) => COLORS[index % COLORS.length];
-	const x = (/** @type {number} */ lane) => lane * LANE_WIDTH + LANE_WIDTH / 2;
-	const y = (/** @type {number} */ fraction) => fraction * ROW_HEIGHT;
+	const color = (index: number) => COLORS[index % COLORS.length];
+	const x = (lane: number) => lane * LANE_WIDTH + LANE_WIDTH / 2;
+	const y = (fraction: number) => fraction * ROW_HEIGHT;
 
-	function drawGraph(row, laneCount, head) {
+	function drawGraph(row: GraphRow, laneCount: number, head: boolean): SVGElement {
 		const width = Math.max(laneCount, 1) * LANE_WIDTH;
 		const el = svg('svg', { width, height: ROW_HEIGHT, viewBox: `0 0 ${width} ${ROW_HEIGHT}` });
 		for (const s of row.segments) {
@@ -101,13 +110,12 @@
 		return el;
 	}
 
-	/** @param {Record<string, unknown>} context */
-	function setContext(element, context) {
+	function setContext(element: Element, context: Record<string, unknown>): void {
 		element.setAttribute('data-vscode-context', JSON.stringify({ preventDefaultContextMenuItems: true, ...context }));
 	}
 
 	/** Context for a commit: the branches and tags on it let the menu offer to copy their names. */
-	function commitContext(commit) {
+	function commitContext(commit: LogEntry): Record<string, unknown> {
 		const branches = commit.refs.filter(r => r.kind !== 'tag').map(r => r.name);
 		const tags = commit.refs.filter(r => r.kind === 'tag').map(r => r.name);
 		return {
@@ -120,10 +128,8 @@
 		};
 	}
 
-	let lastData;
-
 	/** Inserts the message body below `row`, with the lines that continue past this commit running through it. */
-	function showBody(row, data) {
+	function showBody(row: HTMLElement, data: GraphData): void {
 		const index = Number(row.dataset.index);
 		const commit = data.commits[index];
 		const width = Math.max(data.layout.laneCount, 1) * LANE_WIDTH;
@@ -159,10 +165,10 @@
 		row.after(details);
 	}
 
-	function render(data) {
+	function render(data: GraphData): void {
 		lastData = data;
-		const selected = list.querySelector('.selected');
-		const selectedHash = selected ? /** @type {HTMLElement} */ (selected).dataset.hash : undefined;
+		const selected = list.querySelector<HTMLElement>('.selected');
+		const selectedHash = selected ? selected.dataset.hash : undefined;
 		list.textContent = '';
 		message.textContent = data.message || '';
 		moreButton.hidden = !data.hasMore;
@@ -234,7 +240,7 @@
 		list.appendChild(fragment);
 	}
 
-	window.addEventListener('message', event => {
+	window.addEventListener('message', (event: MessageEvent<GraphData>) => {
 		if (event.data.type === 'data') {
 			render(event.data);
 		}

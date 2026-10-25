@@ -156,8 +156,12 @@ export async function readLog(repo: string, maxCount: number): Promise<LogEntry[
 	try {
 		const output = await git(repo, [
 			'log',
-			'--exclude=refs/stash',
-			'--all',
+			// Not `--all`: it also walks refs/jj/keep/* (Jujutsu) and refs/stash, which keep every
+			// abandoned/rewritten commit reachable and flood the graph with commits on no branch.
+			'--branches',
+			'--remotes',
+			'--tags',
+			'HEAD',
 			'--date-order',
 			'--decorate=full',
 			`--max-count=${maxCount}`,

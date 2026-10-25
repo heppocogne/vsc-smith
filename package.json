@@ -3,7 +3,7 @@
 	"displayName": "VSCode Smith",
 	"description": "雑多な拡張機能集",
 	"publisher": "heppocogne",
-	"version": "0.1.0",
+	"version": "0.2.1",
 	"engines": {
 		"vscode": "^1.70.0"
 	},
@@ -340,7 +340,8 @@
 			{
 				"command": "vsc-smith.gitGraph.show",
 				"title": "Show Git Graph",
-				"category": "VSCodeSmith"
+				"category": "VSCodeSmith",
+				"icon": "media/icons/gitGraph.svg"
 			},
 			{
 				"command": "vsc-smith.gitGraph.refresh",
@@ -351,12 +352,14 @@
 			{
 				"command": "vsc-smith.gitGraph.openDiff",
 				"title": "Show Diff",
-				"category": "VSCodeSmith"
+				"category": "VSCodeSmith",
+				"icon": "$(git-compare)"
 			},
 			{
 				"command": "vsc-smith.gitGraph.createBranch",
 				"title": "Create Branch Here",
-				"category": "VSCodeSmith"
+				"category": "VSCodeSmith",
+				"icon": "$(git-branch-create)"
 			},
 			{
 				"command": "vsc-smith.gitGraph.renameBranch",
@@ -366,12 +369,14 @@
 			{
 				"command": "vsc-smith.gitGraph.deleteBranch",
 				"title": "Delete Branch",
-				"category": "VSCodeSmith"
+				"category": "VSCodeSmith",
+				"icon": "$(git-branch-delete)"
 			},
 			{
 				"command": "vsc-smith.gitGraph.mergeBranch",
 				"title": "Merge into Current Branch",
-				"category": "VSCodeSmith"
+				"category": "VSCodeSmith",
+				"icon": "$(git-merge)"
 			},
 			{
 				"command": "vsc-smith.gitGraph.rebaseBranch",
@@ -616,7 +621,8 @@
 					"type": "webview",
 					"id": "vsc-smith.gitGraph",
 					"name": "Git Graph",
-					"when": "vsc-smith.gitGraph.active"
+					"when": "vsc-smith.gitGraph.active",
+					"icon": "media/icons/gitGraph.svg"
 				}
 			]
 		}

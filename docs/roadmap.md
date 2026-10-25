@@ -401,7 +401,7 @@ VS Code 標準のプレビュー (markdown-it) は脚注 `[^1]` に対応して�
 ### 方針
 
 - `git` CLI を直接実行する (`src/features/gitGraph/git.ts`)。標準の Git 拡張 API には依存しない。
-- 配置 (レーン割り当て) は `vscode` に依存しない純粋関数 `layoutGraph` (`graph.ts`)。`git log --all --date-order` の順序を前提にする。
+- 配置 (レーン割り当て) は `vscode` に依存しない純粋関数 `layoutGraph` (`graph.ts`)。`git log --branches --remotes --tags HEAD --date-order` の順序を前提にする。
 - 描画は `media/gitGraph.js` が行ごとの SVG で行う。右クリックは `data-vscode-context` と `webview/context` メニューを使い、
   コマンドは引数でコミット/ブランチ (`hash`, `branch`, `branchKind`, `isCurrent`) を受け取る。
 - 差分は `vsc-smith-git:` スキームの仮想ドキュメント (`git show <ref>:<path>`) を `vscode.diff` で比較する。

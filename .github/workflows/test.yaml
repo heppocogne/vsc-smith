@@ -35,5 +35,6 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - name: Test the Python formatter
         run: python -m unittest discover -s python/tests

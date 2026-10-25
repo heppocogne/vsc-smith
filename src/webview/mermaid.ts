@@ -1,29 +1,34 @@
-// @ts-check
 // Preview script (contributes."markdown.previewScripts"): draws the elements that the markdown-it rule in
 // src/features/mermaid/plugin.ts has left in the Markdown preview. Runs in the preview webview, not in the extension.
+// Built to media/mermaid.js by esbuild.js.
 (function () {
 	const SELECTOR = 'pre.vsc-smith-mermaid';
 	const DIAGRAM_CLASS = 'vsc-smith-mermaid-diagram';
 	const ERROR_CLASS = 'vsc-smith-mermaid-error';
 	const MESSAGE_CLASS = 'vsc-smith-mermaid-message';
 
-	const script = /** @type {HTMLScriptElement} */ (document.currentScript);
+	interface MermaidLibrary {
+		initialize(config: { startOnLoad: boolean; securityLevel: string; theme: string }): void;
+		parse(source: string): Promise<unknown>;
+		render(id: string, source: string): Promise<{ svg: string }>;
+	}
+
+	type Result = { svg: string } | { error: string };
+
+	const script = document.currentScript as HTMLScriptElement;
 	// The preview allows the whole extension folder as a resource root, so the library is read where npm put it.
 	const libraryUrl = new URL('../node_modules/mermaid/dist/mermaid.min.js', script.src).href;
 	const nonce = script.nonce;
 
-	/** @typedef {{ svg: string } | { error: string }} Result */
-
-	/** @type {Promise<any> | undefined} */
-	let library;
-	/** Results by diagram source, so that an update of the preview shows unchanged diagrams without a flicker. @type {Map<string, Result>} */
-	let results = new Map();
-	/** The source of the elements already drawn, to draw them again when the theme changes. @type {WeakMap<Element, string>} */
-	const sources = new WeakMap();
+	let library: Promise<MermaidLibrary> | undefined;
+	/** Results by diagram source, so that an update of the preview shows unchanged diagrams without a flicker. */
+	let results = new Map<string, Result>();
+	/** The source of the elements already drawn, to draw them again when the theme changes. */
+	const sources = new WeakMap<Element, string>();
 	let theme = currentTheme();
 	let nextId = 0;
 
-	function currentTheme() {
+	function currentTheme(): string {
 		const classes = document.body.classList;
 		const dark = classes.contains('vscode-dark')
 			|| (classes.contains('vscode-high-contrast') && !classes.contains('vscode-high-contrast-light'));
@@ -31,24 +36,20 @@
 	}
 
 	/** The library is several megabytes, so it is only loaded once a document has a diagram. */
-	function loadLibrary() {
-		library ??= new Promise((resolve, reject) => {
+	function loadLibrary(): Promise<MermaidLibrary> {
+		library ??= new Promise<MermaidLibrary>((resolve, reject) => {
 			const element = document.createElement('script');
 			element.src = libraryUrl;
 			// The content security policy of the preview only runs scripts carrying its nonce.
 			element.nonce = nonce;
-			element.onload = () => resolve(/** @type {any} */(window).mermaid);
+			element.onload = () => resolve((window as unknown as { mermaid: MermaidLibrary }).mermaid);
 			element.onerror = () => reject(new Error(`Failed to load ${libraryUrl}`));
 			document.head.appendChild(element);
 		});
 		return library;
 	}
 
-	/**
-	 * @param {string} source
-	 * @returns {Promise<Result>}
-	 */
-	async function draw(source) {
+	async function draw(source: string): Promise<Result> {
 		const id = `vsc-smith-mermaid-${nextId++}`;
 		try {
 			const mermaid = await loadLibrary();
@@ -64,12 +65,7 @@
 		}
 	}
 
-	/**
-	 * @param {Element} element
-	 * @param {string} source
-	 * @param {Result} result
-	 */
-	function show(element, source, result) {
+	function show(element: Element, source: string, result: Result): void {
 		sources.set(element, source);
 		element.classList.remove(DIAGRAM_CLASS, ERROR_CLASS);
 		if ('svg' in result) {
@@ -87,12 +83,11 @@
 		element.replaceChildren(message, code);
 	}
 
-	/** @param {Element} element */
-	function isDrawn(element) {
+	function isDrawn(element: Element): boolean {
 		return element.classList.contains(DIAGRAM_CLASS) || element.classList.contains(ERROR_CLASS);
 	}
 
-	async function update() {
+	async function update(): Promise<void> {
 		if (theme !== currentTheme()) {
 			theme = currentTheme();
 			results = new Map();
@@ -130,6 +125,6 @@
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', update);
 	} else {
-		update();
+		void update();
 	}
 })();

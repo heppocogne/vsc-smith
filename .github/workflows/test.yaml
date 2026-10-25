@@ -36,5 +36,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
+          cache-dependency-path: 'python/pyproject.toml'
       - name: Test the Python formatter
         run: python -m unittest discover -s python/tests

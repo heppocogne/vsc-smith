@@ -1,13 +1,12 @@
-// @ts-check
 // Preview script (contributes."markdown.previewScripts"): adds a copy button to the code blocks that the markdown-it
 // rule in src/features/copyButton/plugin.ts has marked. Runs in the preview webview, not in the extension.
+// Built to media/copyButton.js by esbuild.js.
 (function () {
 	const SELECTOR = 'pre[data-vsc-smith-copy]';
 	const BUTTON_CLASS = 'vsc-smith-copy-button';
 	const COPIED_CLASS = 'vsc-smith-copy-copied';
 
-	/** @param {string} text */
-	async function writeClipboard(text) {
+	async function writeClipboard(text: string): Promise<void> {
 		try {
 			await navigator.clipboard.writeText(text);
 			return;
@@ -27,13 +26,12 @@
 		}
 	}
 
-	/** The code of the block, without the button. @param {Element} pre */
-	function codeOf(pre) {
+	/** The code of the block, without the button. */
+	function codeOf(pre: Element): string {
 		return (pre.querySelector('code') ?? pre).textContent ?? '';
 	}
 
-	/** @param {HTMLElement} pre */
-	function addButton(pre) {
+	function addButton(pre: HTMLElement): void {
 		if (pre.querySelector(`:scope > .${BUTTON_CLASS}`) || pre.classList.contains('vsc-smith-mermaid')) {
 			return;
 		}
@@ -54,8 +52,8 @@
 		pre.appendChild(button);
 	}
 
-	function update() {
-		for (const pre of /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(SELECTOR))) {
+	function update(): void {
+		for (const pre of document.querySelectorAll<HTMLElement>(SELECTOR)) {
 			addButton(pre);
 		}
 	}

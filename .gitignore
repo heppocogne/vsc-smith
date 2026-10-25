@@ -9,3 +9,6 @@ node_modules
 .vscode/settings.json
 
 __pycache__
+
+media/*.js
+media/*.js.map

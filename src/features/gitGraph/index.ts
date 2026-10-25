@@ -132,7 +132,7 @@ class GitGraphView implements vscode.WebviewViewProvider, vscode.Disposable {
 			vscode.commands.registerCommand('vsc-smith.gitGraph.show', () =>
 				vscode.commands.executeCommand(`${VIEW_ID}.focus`),
 			),
-			vscode.commands.registerCommand('vsc-smith.gitGraph.refresh', () => this.refresh()),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.refresh', () => this.fetchAndRefresh()),
 			vscode.commands.registerCommand('vsc-smith.gitGraph.openDiff', (target?: CommitTarget) =>
 				this.run(() => this.openDiff(target?.hash)),
 			),
@@ -258,6 +258,24 @@ class GitGraphView implements vscode.WebviewViewProvider, vscode.Disposable {
 			watcher.onDidCreate(onChange),
 			watcher.onDidDelete(onChange),
 		);
+	}
+
+	/** Fetches all remotes, then refreshes the graph. A failed fetch is reported but the graph still refreshes. */
+	private async fetchAndRefresh(): Promise<void> {
+		try {
+			await useConfiguredGit();
+			this.repo ??= await this.findRepo();
+			const repo = this.repo;
+			if (repo) {
+				await vscode.window.withProgress(
+					{ location: { viewId: VIEW_ID }, title: 'Fetching...' },
+					() => git(repo, ['fetch', '--all', '--prune']),
+				);
+			}
+		} catch (err) {
+			void vscode.window.showErrorMessage(err instanceof Error ? err.message : String(err));
+		}
+		await this.refresh();
 	}
 
 	async refresh(): Promise<void> {

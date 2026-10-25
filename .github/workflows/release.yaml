@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,10 +23,21 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Determine release name
+        id: release_name
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=prerelease-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
       - name: Package VSIX
-        run: npx --yes @vscode/vsce package -o vsc-smith_${{ github.ref_name }}.vsix
+        run: npx --yes @vscode/vsce package -o vsc-smith_${{ steps.release_name.outputs.name }}.vsix
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ steps.release_name.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          prerelease: ${{ github.ref_type != 'tag' }}
           files: '*.vsix'
           generate_release_notes: true

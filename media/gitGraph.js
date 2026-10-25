@@ -106,6 +106,20 @@
 		element.setAttribute('data-vscode-context', JSON.stringify({ preventDefaultContextMenuItems: true, ...context }));
 	}
 
+	/** Context for a commit: the branches and tags on it let the menu offer to copy their names. */
+	function commitContext(commit) {
+		const branches = commit.refs.filter(r => r.kind !== 'tag').map(r => r.name);
+		const tags = commit.refs.filter(r => r.kind === 'tag').map(r => r.name);
+		return {
+			webviewSection: 'commit',
+			hash: commit.hash,
+			branches,
+			tags,
+			hasBranch: branches.length > 0,
+			hasTag: tags.length > 0,
+		};
+	}
+
 	let lastData;
 
 	/** Inserts the message body below `row`, with the lines that continue past this commit running through it. */
@@ -116,7 +130,7 @@
 		const details = document.createElement('div');
 		details.className = 'details';
 		details.dataset.hash = commit.hash;
-		setContext(details, { webviewSection: 'commit', hash: commit.hash });
+		setContext(details, commitContext(commit));
 
 		const gutter = document.createElement('div');
 		gutter.className = 'gutter';
@@ -163,7 +177,7 @@
 				(open ? ' expanded' : '');
 			row.dataset.hash = commit.hash;
 			row.dataset.index = String(index);
-			setContext(row, { webviewSection: 'commit', hash: commit.hash });
+			setContext(row, commitContext(commit));
 			row.title = `${commit.hash}\n${commit.author}\n${commit.subject}`;
 
 			row.appendChild(drawGraph(data.layout.rows[index], data.layout.laneCount, commit.head));
@@ -174,7 +188,9 @@
 				const label = document.createElement('span');
 				label.className = `ref ${ref.kind}` + (ref.current ? ' current' : '');
 				label.textContent = ref.name;
-				if (ref.kind !== 'tag') {
+				if (ref.kind === 'tag') {
+					setContext(label, { webviewSection: 'tag', hash: commit.hash, tag: ref.name });
+				} else {
 					setContext(label, {
 						webviewSection: 'branch',
 						hash: commit.hash,

@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ToggleableFeature } from '../../util/feature';
@@ -6,9 +7,15 @@ import {
 	ChangedFile,
 	findRepoRoot,
 	git,
+	hasLocalChanges,
+	hasMergeFrom,
+	isAncestorOfHead,
+	isOnRemote,
 	isValidBranchName,
+	isValidTagName,
 	LogEntry,
 	readChangedFiles,
+	readCommitMessage,
 	readFileAt,
 	readLog,
 	setGitPath,
@@ -26,6 +33,11 @@ const OTHER_EXTENSIONS = ['mhutchie.git-graph', 'eamodio.gitlens'];
 /** What a command receives from a right click in the webview (`data-vscode-context`). */
 interface CommitTarget {
 	hash?: string;
+	/** Names of the branches and tags on the commit. */
+	branches?: string[];
+	tags?: string[];
+	/** Set when the click was on a tag label. */
+	tag?: string;
 }
 interface BranchTarget extends CommitTarget {
 	branch?: string;
@@ -138,6 +150,24 @@ class GitGraphView implements vscode.WebviewViewProvider, vscode.Disposable {
 			),
 			vscode.commands.registerCommand('vsc-smith.gitGraph.rebaseBranch', (target?: BranchTarget) =>
 				this.run(() => this.rebaseBranch(target)),
+			),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.editMessage', (target?: CommitTarget) =>
+				this.run(() => this.editMessage(target?.hash)),
+			),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.createTag', (target?: CommitTarget) =>
+				this.run(() => this.createTag(target?.hash)),
+			),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.copyHash', (target?: CommitTarget) =>
+				this.copy(target?.hash),
+			),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.copyShortHash', (target?: CommitTarget) =>
+				this.copy(target?.hash && shortHash(target.hash)),
+			),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.copyBranchName', (target?: BranchTarget) =>
+				this.copyName(target?.branch ? [target.branch] : target?.branches, 'branch'),
+			),
+			vscode.commands.registerCommand('vsc-smith.gitGraph.copyTagName', (target?: CommitTarget) =>
+				this.copyName(target?.tag ? [target.tag] : target?.tags, 'tag'),
 			),
 		);
 	}
@@ -333,6 +363,124 @@ class GitGraphView implements vscode.WebviewViewProvider, vscode.Disposable {
 		if (answer === checkout) {
 			await git(repo, ['checkout', trimmed]);
 		}
+	}
+
+	/** Rewords a commit: `--amend` for HEAD, otherwise a non-interactive `rebase -i` that rewords the first pick. */
+	private async editMessage(hash: string | undefined): Promise<void> {
+		if (!hash) {
+			return;
+		}
+		const repo = this.requireRepo();
+		if (!(await isAncestorOfHead(repo, hash))) {
+			throw new Error('Only commits on the checked-out branch can be edited.');
+		}
+		if (await hasMergeFrom(repo, hash)) {
+			throw new Error('Commits that are merges, or are followed by a merge, cannot be edited.');
+		}
+		if (await isOnRemote(repo, hash)) {
+			throw new Error('This commit has already been pushed and cannot be edited.');
+		}
+		const original = await readCommitMessage(repo, hash);
+		const document = await vscode.workspace.openTextDocument({ content: original, language: 'git-commit' });
+		await vscode.window.showTextDocument(document);
+		const apply = 'Apply';
+		const answer = await vscode.window.showInformationMessage(
+			`Edit the message of ${shortHash(hash)}, then press Apply.`,
+			apply,
+		);
+		if (answer !== apply) {
+			return;
+		}
+		const message = document.getText().trim();
+		if (!message) {
+			throw new Error('The commit message is empty.');
+		}
+		if (message === original) {
+			return;
+		}
+
+		const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'vsc-smith-')), 'message.txt');
+		fs.writeFileSync(file, message + '\n');
+		const stashed = await hasLocalChanges(repo);
+		try {
+			if (stashed) {
+				await git(repo, ['stash', 'push', '-m', 'vsc-smith: edit commit message']);
+			}
+			try {
+				await this.reword(repo, hash, file);
+			} catch (err) {
+				await git(repo, ['rebase', '--abort']).catch(() => undefined);
+				throw err;
+			} finally {
+				if (stashed) {
+					await this.popStash(repo);
+				}
+			}
+		} finally {
+			fs.rmSync(path.dirname(file), { recursive: true, force: true });
+		}
+	}
+
+	private async reword(repo: string, hash: string, file: string): Promise<void> {
+		const head = (await git(repo, ['rev-parse', 'HEAD'])).trim();
+		if (head === hash) {
+			await git(repo, ['commit', '--amend', '--only', '--cleanup=whitespace', '-F', file]);
+			return;
+		}
+		// git runs these through sh, even on Windows. The editor copies the prepared message over the one git asks for.
+		const quoted = `'${file.replace(/\\/g, '/').replace(/'/g, `'\\''`)}'`;
+		const hasParent = (await git(repo, ['rev-list', '--parents', '-n', '1', hash])).trim().includes(' ');
+		await git(
+			repo,
+			['-c', 'commit.cleanup=whitespace', 'rebase', '-i', ...(hasParent ? [`${hash}^`] : ['--root'])],
+			{ GIT_SEQUENCE_EDITOR: 'sed -i 1s/^pick/reword/', GIT_EDITOR: `cp ${quoted}` },
+		);
+	}
+
+	private async popStash(repo: string): Promise<void> {
+		try {
+			await git(repo, ['stash', 'pop', '--index']);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : String(err);
+			void vscode.window.showWarningMessage(
+				`Could not restore your changes; they are kept in the stash. ${message}`,
+			);
+		}
+	}
+
+	private async createTag(hash: string | undefined): Promise<void> {
+		if (!hash) {
+			return;
+		}
+		const repo = this.requireRepo();
+		const name = await vscode.window.showInputBox({
+			title: `Create tag at ${shortHash(hash)}`,
+			prompt: 'Tag name',
+			validateInput: value => (value.trim() ? undefined : 'Enter a tag name'),
+		});
+		const trimmed = name?.trim();
+		if (!trimmed) {
+			return;
+		}
+		if (!(await isValidTagName(repo, trimmed))) {
+			throw new Error(`"${trimmed}" is not a valid tag name.`);
+		}
+		await git(repo, ['tag', trimmed, hash]);
+	}
+
+	private async copy(text: string | undefined): Promise<void> {
+		if (text) {
+			await vscode.env.clipboard.writeText(text);
+		}
+	}
+
+	/** Copies a branch or tag name; when the commit has several, asks which one. */
+	private async copyName(names: string[] | undefined, kind: string): Promise<void> {
+		if (!names?.length) {
+			return;
+		}
+		const name = names.length === 1 ? names[0] : await vscode.window.showQuickPick(names, { title: `Copy ${kind} name` });
+		await this.copy(name);
 	}
 
 	private async renameBranch(target: BranchTarget | undefined): Promise<void> {

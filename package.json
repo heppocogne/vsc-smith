@@ -39,7 +39,13 @@
 		"onCommand:vsc-smith.gitGraph.renameBranch",
 		"onCommand:vsc-smith.gitGraph.deleteBranch",
 		"onCommand:vsc-smith.gitGraph.mergeBranch",
-		"onCommand:vsc-smith.gitGraph.rebaseBranch"
+		"onCommand:vsc-smith.gitGraph.rebaseBranch",
+		"onCommand:vsc-smith.gitGraph.copyBranchName",
+		"onCommand:vsc-smith.gitGraph.copyTagName",
+		"onCommand:vsc-smith.gitGraph.editMessage",
+		"onCommand:vsc-smith.gitGraph.createTag",
+		"onCommand:vsc-smith.gitGraph.copyHash",
+		"onCommand:vsc-smith.gitGraph.copyShortHash"
 	],
 	"main": "./dist/extension.js",
 	"capabilities": {
@@ -382,6 +388,36 @@
 				"command": "vsc-smith.gitGraph.rebaseBranch",
 				"title": "Rebase Current Branch onto This",
 				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.copyBranchName",
+				"title": "Copy Branch Name",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.copyTagName",
+				"title": "Copy Tag Name",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.editMessage",
+				"title": "Edit Commit Message",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.createTag",
+				"title": "Create Tag Here",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.copyHash",
+				"title": "Copy Commit Hash (Full)",
+				"category": "VSCodeSmith"
+			},
+			{
+				"command": "vsc-smith.gitGraph.copyShortHash",
+				"title": "Copy Commit Hash (Short)",
+				"category": "VSCodeSmith"
 			}
 		],
 		"menus": {
@@ -481,6 +517,30 @@
 				{
 					"command": "vsc-smith.gitGraph.rebaseBranch",
 					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyBranchName",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyTagName",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.editMessage",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createTag",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyHash",
+					"when": "false"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyShortHash",
+					"when": "false"
 				}
 			],
 			"explorer/context": [
@@ -565,6 +625,86 @@
 					"command": "vsc-smith.gitGraph.rebaseBranch",
 					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch' && !isCurrent",
 					"group": "3_integrate@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.editMessage",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+					"group": "7_edit@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.editMessage",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "7_edit@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.editMessage",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'tag'",
+					"group": "7_edit@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyBranchName",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit' && hasBranch",
+					"group": "4_copy@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyTagName",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit' && hasTag",
+					"group": "4_copy@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createTag",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+					"group": "5_tag@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyHash",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+					"group": "6_hash@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyShortHash",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'commit'",
+					"group": "6_hash@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyBranchName",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "4_copy@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createTag",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "5_tag@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyHash",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "6_hash@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyShortHash",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'branch'",
+					"group": "6_hash@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyTagName",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'tag'",
+					"group": "4_copy@2"
+				},
+				{
+					"command": "vsc-smith.gitGraph.createTag",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'tag'",
+					"group": "5_tag@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyHash",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'tag'",
+					"group": "6_hash@1"
+				},
+				{
+					"command": "vsc-smith.gitGraph.copyShortHash",
+					"when": "webviewId == 'vsc-smith.gitGraph' && webviewSection == 'tag'",
+					"group": "6_hash@2"
 				}
 			]
 		},

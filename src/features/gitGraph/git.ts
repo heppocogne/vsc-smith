@@ -45,7 +45,7 @@ export function setGitPath(value: string | undefined): void {
 	gitPath = value || 'git';
 }
 
-export function git(cwd: string, args: string[]): Promise<string> {
+export function git(cwd: string, args: string[], env: NodeJS.ProcessEnv = {}): Promise<string> {
 	return new Promise((resolve, reject) => {
 		execFile(
 			gitPath,
@@ -54,7 +54,7 @@ export function git(cwd: string, args: string[]): Promise<string> {
 				cwd,
 				maxBuffer: 64 * 1024 * 1024,
 				// GIT_EDITOR=true keeps merges and rebases from waiting for an editor nobody can see.
-				env: { ...process.env, GIT_EDITOR: 'true', GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C' },
+				env: { ...process.env, GIT_EDITOR: 'true', GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', ...env },
 			},
 			(err, stdout, stderr) => {
 				if (!err) {
@@ -202,4 +202,46 @@ export async function isValidBranchName(repo: string, name: string): Promise<boo
 	} catch {
 		return false;
 	}
+}
+
+export async function isValidTagName(repo: string, name: string): Promise<boolean> {
+	try {
+		await git(repo, ['check-ref-format', `refs/tags/${name}`]);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+export async function readCommitMessage(repo: string, hash: string): Promise<string> {
+	return (await git(repo, ['log', '-1', '--format=%B', hash])).trim();
+}
+
+/** True when the commit is an ancestor of HEAD (or HEAD itself). */
+export async function isAncestorOfHead(repo: string, hash: string): Promise<boolean> {
+	try {
+		await git(repo, ['merge-base', '--is-ancestor', hash, 'HEAD']);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+/** True when any remote-tracking branch contains the commit, i.e. it has probably been pushed. */
+export async function isOnRemote(repo: string, hash: string): Promise<boolean> {
+	return (await git(repo, ['branch', '--remotes', '--contains', hash])).trim() !== '';
+}
+
+/** True when the commit, or a commit after it up to HEAD, is a merge. */
+export async function hasMergeFrom(repo: string, hash: string): Promise<boolean> {
+	const parents = (await git(repo, ['rev-list', '--parents', '-n', '1', hash])).trim().split(' ');
+	if (parents.length > 2) {
+		return true;
+	}
+	return (await git(repo, ['rev-list', '--merges', '--max-count=1', `${hash}..HEAD`])).trim() !== '';
+}
+
+/** True when tracked files have staged or unstaged changes. */
+export async function hasLocalChanges(repo: string): Promise<boolean> {
+	return (await git(repo, ['status', '--porcelain', '--untracked-files=no'])).trim() !== '';
 }
